@@ -6,11 +6,23 @@ const { signToken, auth } = require("../../utils/auth");
 // *** User GET Routes ***
 // **************************
 
-// Get User by ID route
+// Get User by ID route (available for all users if loggedIn)
 // /api/user/get/:id
 router.get("/get/:id", auth, async (req, res) => {
 	try {
+		const authenticatedUser = await User.findById(req.user.data._id);
+
+		if (!authenticatedUser) {
+			return res.status(404).send("Authenticated user not found.");
+		}
+
 		const user = await User.findById(req.params.id);
+		console.log(req.params.id);
+
+		if (!user) {
+			return res.status(404).send("User not found.");
+		}
+
 		res.json(user);
 	} catch (err) {
 		res.status(400).json(err);
@@ -21,6 +33,12 @@ router.get("/get/:id", auth, async (req, res) => {
 // /api/user/get/
 router.get("/get", auth, async (req, res) => {
 	try {
+		const authenticatedUser = await User.findById(req.user.data._id);
+
+		if (!authenticatedUser) {
+			return res.status(404).send("Authenticated user not found.");
+		}
+
 		const users = await User.find({});
 		res.json(users);
 	} catch (err) {
