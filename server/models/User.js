@@ -8,7 +8,11 @@ const userSchema = new Schema({
 		unique: true,
 		match: [/.+@.+\..+/, "Must match an email address!"],
 	},
-	name: {
+	first_name: {
+		type: String,
+		required: true,
+	},
+	last_name: {
 		type: String,
 		required: true,
 	},
