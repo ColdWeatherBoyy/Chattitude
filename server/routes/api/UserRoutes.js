@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { User } = require("../../models");
-const { signToken, auth } = require("../../../utils/auth");
+const { signToken, auth } = require("../../utils/auth");
 
 // **************************
 // *** User GET Routes ***
@@ -8,7 +8,7 @@ const { signToken, auth } = require("../../../utils/auth");
 
 // Get User by ID route
 // /api/user/get/:id
-router.get("/get/:id", async (req, res) => {
+router.get("/get/:id", auth, async (req, res) => {
 	try {
 		const user = await User.findById(req.params.id);
 		res.json(user);
@@ -19,7 +19,7 @@ router.get("/get/:id", async (req, res) => {
 
 // Get all Users route
 // /api/user/get/
-router.get("/get", async (req, res) => {
+router.get("/get", auth, async (req, res) => {
 	try {
 		const users = await User.find({});
 		res.json(users);
@@ -166,12 +166,13 @@ router.put("/", auth, async (req, res) => {
 
 // Delete User by ID route
 // Requires UI to ask user to retype email address to confirm deletion
-// /api/user/delete/:id
+// /api/user/delete/
 router.delete("/delete", auth, async (req, res) => {
 	try {
 		const { confirmationPassword } = req.body;
 
-		const user = await User.findById(req.user._id);
+		const user = await User.findById(req.user.data._id);
+		console.log(user);
 
 		if (!user) {
 			return res.status(404).send("User not found.");
@@ -183,8 +184,10 @@ router.delete("/delete", auth, async (req, res) => {
 			return res.status(400).send("Password does not match user record.");
 		}
 
-		const deletedUser = await User.findByIdAndDelete(req.user._id);
-		res.status(200).json({ message: `Account for ${deletedUser.first_name} deleted!` });
+		const deletedUser = await User.findByIdAndDelete(req.user.data._id);
+		res.status(200).json({
+			message: `Account for ${deletedUser.first_name} ${deletedUser.last_name} deleted!`,
+		});
 	} catch (err) {
 		res.status(400).json(err);
 	}
