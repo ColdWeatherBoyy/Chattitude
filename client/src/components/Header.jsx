@@ -15,7 +15,9 @@ function Header() {
 				px={5}
 				color="white"
 			>
-				<Heading>Chattitude</Heading>
+				<Link to="/">
+					<Heading>Chattitude</Heading>
+				</Link>
 				<Box display="flex" flexDirection="row">
 					<Link to="/login">
 						<Text mx={3}>Login</Text>

@@ -2,7 +2,9 @@ import { extendTheme } from "@chakra-ui/react";
 
 const theme = extendTheme({
 	fonts: {
-		heading: "Sans-Serif",
+		heading: "Bitter, Sans-Serif",
+		text: "Lato, Sans-Serif",
+		button: "Lato, Sans-Serif",
 	},
 	colors: {
 		brand: {
