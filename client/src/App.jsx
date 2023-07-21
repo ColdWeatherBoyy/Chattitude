@@ -1,13 +1,7 @@
-import { Box, Heading } from "@chakra-ui/react";
+import Home from "./pages/Home";
 
 function App() {
-	return (
-		<>
-			<Box>
-				<Heading>Chattitude</Heading>
-			</Box>
-		</>
-	);
+	return <Home />;
 }
 
 export default App;

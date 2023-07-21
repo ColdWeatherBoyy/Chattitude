@@ -1,12 +1,4 @@
-import {
-	Box,
-	Heading,
-	FormControl,
-	FormLabel,
-	Input,
-	Button,
-	Text,
-} from "@chakra-ui/react";
+import { Box, Heading, Text } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
 function Header() {
