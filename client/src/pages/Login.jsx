@@ -30,17 +30,28 @@ function Login() {
 		// connect to api route
 		// if successful, redirect to home page
 		// if not, display error message
-		// const response = await fetch("/api/user/post/login", {
-		// 	method: "POST",
-		// 	headers: {
-		// 		"Content-Type": "application/json",
-		// 	},
-		// 	body: JSON.stringify({
-		// 		email: emailInput,
-		// 		password: passwordInput,
-		// 	}),
-		// });
-		// const data = await response.json();
+		if (!emailError && !passwordError) {
+			try {
+				const response = await fetch("/api/user/post/login", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						email: emailInput,
+						password: passwordInput,
+					}),
+				});
+				if (response.ok) {
+					const data = await response.json();
+				} else {
+					const errorData = await response.json();
+					alert(errorData.error);
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		}
 	};
 
 	const updateEmail = (event) => {
