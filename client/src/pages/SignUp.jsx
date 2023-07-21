@@ -12,12 +12,14 @@ function SignUp() {
 	const [emailError, setEmailError] = useState(false);
 	const [passwordError, setPasswordError] = useState(false);
 	const [confirmError, setConfirmError] = useState(false);
+	const [matchError, setMatchError] = useState(false);
 	const [firstNameError, setFirstNameError] = useState(false);
 	const [lastNameError, setLastNameError] = useState(false);
 
 	let emailMessage = emailError ? "Email is required" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
 	let confirmMessage = confirmError ? "Confirmation is required" : "";
+	let matchMessage = confirmError ? "Passwords do not match" : "";
 	let firstNameMessage = firstNameError ? "First name is required" : "";
 	let lastNameMessage = lastNameError ? "Last name is required" : "";
 
@@ -43,12 +45,52 @@ function SignUp() {
 		if (lastNameInput.trim() === "") {
 			setLastNameError(true);
 		}
-		console.log("sign in attempt");
-		console.log("First Name: " + firstNameInput);
-		console.log("Last Name: " + lastNameInput);
-		console.log("Email: " + emailInput);
-		console.log("Password: " + passwordInput);
-		console.log("Password Confirmation: " + confirmInput);
+		if (passwordInput.trim() !== confirmInput.trim()) {
+			setMatchError(true);
+		}
+
+		if (
+			!emailError &&
+			!passwordError &&
+			!confirmError &&
+			!matchError &&
+			!firstNameError &&
+			!lastNameError
+		) {
+			try {
+				console.log("sign in attempt");
+				console.log("First Name: " + firstNameInput);
+				console.log("Last Name: " + lastNameInput);
+				console.log("Email: " + emailInput);
+				console.log("Password: " + passwordInput);
+				console.log("Password Confirmation: " + confirmInput);
+
+				const response = fetch("/api/user/post/signup", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						firstName: firstNameInput,
+						lastName: lastNameInput,
+						email: emailInput,
+						password: passwordInput,
+					}),
+				});
+				if (response.ok) {
+					const data = response.json();
+					// store token in cookies
+					document.cookie = `token=${data.token}`;
+					// redirect to messages
+					window.location.href = "/websockettest";
+				} else {
+					const errorData = response.json();
+					alert(errorData.error);
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		}
 	};
 
 	const updateEmail = (event) => {
@@ -131,10 +173,13 @@ function SignUp() {
 						placeholder="Confirm Password"
 						onChange={updateConfirm}
 						onBlur={updateConfirm}
-						isInvalid={confirmError}
+						isInvalid={confirmError || matchError}
 					/>
 					<Text pb={3} color="red.600">
 						{confirmMessage}
+					</Text>
+					<Text pb={3} color="red.600">
+						{matchMessage}
 					</Text>
 				</FormControl>
 				<BrandButton onClick={signIn}>Sign Up</BrandButton>

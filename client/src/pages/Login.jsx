@@ -5,8 +5,8 @@ import Header from "../components/Header.jsx";
 import { set } from "mongoose";
 
 function Login() {
-	const [emailInput, setEmailInput] = useState(" ");
-	const [passwordInput, setPasswordInput] = useState(" ");
+	const [emailInput, setEmailInput] = useState("");
+	const [passwordInput, setPasswordInput] = useState("");
 	const [emailError, setEmailError] = useState(false);
 	const [passwordError, setPasswordError] = useState(false);
 	let emailMessage = emailError ? "Email is required" : "";
@@ -27,11 +27,12 @@ function Login() {
 		console.log("Email: " + emailInput);
 		console.log("Password: " + passwordInput);
 
-		// connect to api route
-		// if successful, redirect to home page
-		// if not, display error message
 		if (!emailError && !passwordError) {
 			try {
+				console.log("log in attempt");
+				console.log("Email: " + emailInput);
+				console.log("Password: " + passwordInput);
+
 				const response = await fetch("/api/user/post/login", {
 					method: "POST",
 					headers: {
@@ -44,6 +45,10 @@ function Login() {
 				});
 				if (response.ok) {
 					const data = await response.json();
+					// store token in cookies
+					document.cookie = `token=${data.token}`;
+					// redirect to messages
+					window.location.href = "/websockettest";
 				} else {
 					const errorData = await response.json();
 					alert(errorData.error);
