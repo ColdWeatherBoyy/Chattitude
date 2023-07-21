@@ -1,12 +1,4 @@
-import {
-	Box,
-	Heading,
-	FormControl,
-	FormLabel,
-	Input,
-	Button,
-	Text,
-} from "@chakra-ui/react";
+import { Box, Heading, FormControl, FormLabel, Input, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import Header from "../components/Header.jsx";
 import BrandButton from "../components/BrandButton.jsx";
@@ -17,11 +9,12 @@ function SignUp() {
 	const [emailInput, setEmailInput] = useState(" ");
 	const [passwordInput, setPasswordInput] = useState(" ");
 	const [confirmInput, setConfirmInput] = useState(" ");
-	let firstNameError = firstNameInput === "";
-	let lastNameError = lastNameInput === "";
-	let emailError = emailInput === "";
-	let passwordError = passwordInput === "";
-	let confirmError = confirmInput === "";
+	const [emailError, setEmailError] = useState(false);
+	const [passwordError, setPasswordError] = useState(false);
+	const [confirmError, setConfirmError] = useState(false);
+	const [firstNameError, setFirstNameError] = useState(false);
+	const [lastNameError, setLastNameError] = useState(false);
+
 	let emailMessage = emailError ? "Email is required" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
 	let confirmMessage = confirmError ? "Confirmation is required" : "";
@@ -29,20 +22,26 @@ function SignUp() {
 	let lastNameMessage = lastNameError ? "Last name is required" : "";
 
 	const signIn = () => {
-		if (emailInput === " ") {
-			emailError = true;
+		setEmailError(false);
+		setPasswordError(false);
+		setConfirmError(false);
+		setFirstNameError(false);
+		setLastNameError(false);
+
+		if (emailInput.trim() === "") {
+			setEmailError(true);
 		}
-		if (passwordInput === " ") {
-			passwordError = true;
+		if (passwordInput.trim() === "") {
+			setPasswordError(true);
 		}
-		if (confirmInput === " ") {
-			confirmError = true;
+		if (confirmInput.trim() === "") {
+			setConfirmError(true);
 		}
-		if (firstNameInput === " ") {
-			firstNameError = true;
+		if (firstNameInput.trim() === "") {
+			setFirstNameError(true);
 		}
-		if (lastNameInput === " ") {
-			lastNameError = true;
+		if (lastNameInput.trim() === "") {
+			setLastNameError(true);
 		}
 		console.log("sign in attempt");
 		console.log("First Name: " + firstNameInput);
