@@ -14,7 +14,7 @@ function Login() {
 	let emailMessage = emailError ? "Email is required" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
 
-	const signIn = async () => {
+	const logIn = async () => {
 		setEmailError(false);
 		setPasswordError(false);
 		setSubmitted(true);
@@ -118,7 +118,7 @@ function Login() {
 						{passwordMessage}
 					</Text>
 				</FormControl>
-				<BrandButton onClick={signIn}>Log In</BrandButton>
+				<BrandButton onClick={logIn}>Log In</BrandButton>
 			</Box>
 		</>
 	);

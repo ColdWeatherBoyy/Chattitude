@@ -35,13 +35,13 @@ router.get("/get", auth, async (req, res) => {
 		const authenticatedUser = await User.findById(req.user.data._id);
 
 		if (!authenticatedUser) {
-			return res.status(404).send({ message: "Authenticated user not found." });
+			return res.status(404).send({ error: "Authenticated user not found." });
 		}
 
 		const users = await User.find({});
 		res.json(users);
 	} catch (err) {
-		res.status(400).json({ message: err });
+		res.status(400).json({ error: err });
 	}
 });
 
@@ -67,9 +67,9 @@ router.post("/post/create", async (req, res) => {
 		if (err.code === 11000 && err.keyPattern && err.keyValue) {
 			// Duplicate key error for email field
 			const { email } = err.keyValue;
-			return res.status(400).json({ message: `Email '${email}' is already in use.` });
+			return res.status(400).json({ error: `Email '${email}' is already in use.` });
 		}
-		res.status(400).json(err);
+		res.status(400).json({ error: err });
 	}
 });
 

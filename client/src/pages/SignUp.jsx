@@ -1,97 +1,123 @@
 import { Box, Heading, FormControl, FormLabel, Input, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../components/Header.jsx";
 import BrandButton from "../components/BrandButton.jsx";
 
 function SignUp() {
-	const [firstNameInput, setFirstNameInput] = useState(" ");
-	const [lastNameInput, setLastNameInput] = useState(" ");
-	const [emailInput, setEmailInput] = useState(" ");
-	const [passwordInput, setPasswordInput] = useState(" ");
-	const [confirmInput, setConfirmInput] = useState(" ");
+	const [firstNameInput, setFirstNameInput] = useState("");
+	const [lastNameInput, setLastNameInput] = useState("");
+	const [emailInput, setEmailInput] = useState("");
+	const [passwordInput, setPasswordInput] = useState("");
+	const [confirmInput, setConfirmInput] = useState("");
 	const [emailError, setEmailError] = useState(false);
 	const [passwordError, setPasswordError] = useState(false);
 	const [confirmError, setConfirmError] = useState(false);
 	const [matchError, setMatchError] = useState(false);
 	const [firstNameError, setFirstNameError] = useState(false);
 	const [lastNameError, setLastNameError] = useState(false);
+	const [submitted, setSubmitted] = useState(false);
+	const [makeFetch, setMakeFetch] = useState(false);
 
 	let emailMessage = emailError ? "Email is required" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
 	let confirmMessage = confirmError ? "Confirmation is required" : "";
-	let matchMessage = confirmError ? "Passwords do not match" : "";
+	let matchMessage = matchError ? "Passwords do not match" : "";
 	let firstNameMessage = firstNameError ? "First name is required" : "";
 	let lastNameMessage = lastNameError ? "Last name is required" : "";
 
-	const signIn = () => {
+	async function fetchData() {
+		try {
+			const response = await fetch("/api/user/post/create", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					first_name: firstNameInput,
+					last_name: lastNameInput,
+					email: emailInput,
+					password: passwordInput,
+				}),
+			});
+			if (response.ok) {
+				const data = await response.json();
+				// store token in cookies
+				document.cookie = `token=${data.token}`;
+				// redirect to messages
+				window.location.href = "/websockettest";
+			} else {
+				const errorData = await response.json();
+				console.log(errorData);
+				alert(errorData.error);
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	const signIn = async () => {
 		setEmailError(false);
 		setPasswordError(false);
 		setConfirmError(false);
+		setMatchError(false);
 		setFirstNameError(false);
 		setLastNameError(false);
+		setSubmitted(true);
+		console.log("sign in attempt");
+		console.log("First Name: " + firstNameInput);
+		console.log("Last Name: " + lastNameInput);
+		console.log("Email: " + emailInput);
+		console.log("Password: " + passwordInput);
+		console.log("Password Confirmation: " + confirmInput);
+	};
 
-		if (emailInput.trim() === "") {
-			setEmailError(true);
+	useEffect(() => {
+		if (submitted) {
+			if (emailInput.trim() === "") {
+				setEmailError(true);
+			}
+			if (passwordInput.trim() === "") {
+				setPasswordError(true);
+			}
+			if (confirmInput.trim() === "") {
+				setConfirmError(true);
+			}
+			if (firstNameInput.trim() === "") {
+				setFirstNameError(true);
+			}
+			if (lastNameInput.trim() === "") {
+				setLastNameError(true);
+			}
+			if (passwordInput.trim() !== confirmInput.trim() && confirmInput.trim() !== "") {
+				setMatchError(true);
+			}
+			if (
+				!emailError &&
+				!passwordError &&
+				!confirmError &&
+				!matchError &&
+				!firstNameError &&
+				!lastNameError
+			) {
+				setMakeFetch(true);
+			}
 		}
-		if (passwordInput.trim() === "") {
-			setPasswordError(true);
-		}
-		if (confirmInput.trim() === "") {
-			setConfirmError(true);
-		}
-		if (firstNameInput.trim() === "") {
-			setFirstNameError(true);
-		}
-		if (lastNameInput.trim() === "") {
-			setLastNameError(true);
-		}
-		if (passwordInput.trim() !== confirmInput.trim()) {
-			setMatchError(true);
-		}
-
-		if (
+	}, [
+		submitted &&
 			!emailError &&
 			!passwordError &&
 			!confirmError &&
 			!matchError &&
 			!firstNameError &&
-			!lastNameError
-		) {
-			try {
-				console.log("sign in attempt");
-				console.log("First Name: " + firstNameInput);
-				console.log("Last Name: " + lastNameInput);
-				console.log("Email: " + emailInput);
-				console.log("Password: " + passwordInput);
-				console.log("Password Confirmation: " + confirmInput);
+			!lastNameError,
+	]);
 
-				const response = fetch("/api/user/post/signup", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						firstName: firstNameInput,
-						lastName: lastNameInput,
-						email: emailInput,
-						password: passwordInput,
-					}),
-				});
-				if (response.ok) {
-					const data = response.json();
-					// store token in cookies
-					document.cookie = `token=${data.token}`;
-					// redirect to messages
-					window.location.href = "/websockettest";
-				} else {
-					const errorData = response.json();
-					alert(errorData.error);
-				}
-			} catch (error) {
-				console.log(error);
-			}
+	useEffect(() => {
+		if (makeFetch) {
+			fetchData();
+			setMakeFetch(false);
 		}
-	};
+	}, [makeFetch]);
 
 	const updateEmail = (event) => {
 		setEmailInput(event.currentTarget.value);
@@ -132,6 +158,7 @@ function SignUp() {
 						onChange={updateFirstName}
 						onBlur={updateFirstName}
 						isInvalid={firstNameError}
+						id="firstName"
 					/>
 					<Text pb={3} color="red.600">
 						{firstNameMessage}
@@ -142,6 +169,7 @@ function SignUp() {
 						onChange={updateLastName}
 						onBlur={updateLastName}
 						isInvalid={lastNameError}
+						id="lastName"
 					/>
 					<Text pb={3} color="red.600">
 						{lastNameMessage}
@@ -152,6 +180,7 @@ function SignUp() {
 						onChange={updateEmail}
 						onBlur={updateEmail}
 						isInvalid={emailError}
+						id="email"
 					/>
 					<Text pb={3} color="red.600">
 						{emailMessage}
@@ -163,6 +192,7 @@ function SignUp() {
 						onChange={updatePassword}
 						onBlur={updatePassword}
 						isInvalid={passwordError}
+						id="password"
 					/>
 					<Text pb={3} color="red.600">
 						{passwordMessage}
@@ -174,6 +204,7 @@ function SignUp() {
 						onChange={updateConfirm}
 						onBlur={updateConfirm}
 						isInvalid={confirmError || matchError}
+						id="passwordConfirm"
 					/>
 					<Text pb={3} color="red.600">
 						{confirmMessage}
