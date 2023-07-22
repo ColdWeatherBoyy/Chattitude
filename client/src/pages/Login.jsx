@@ -9,19 +9,9 @@ function Login() {
 	const [passwordInput, setPasswordInput] = useState("");
 	const [emailError, setEmailError] = useState(false);
 	const [passwordError, setPasswordError] = useState(false);
-	const [submitted, setSubmitted] = useState(false);
 	const [makeFetch, setMakeFetch] = useState(false);
 	let emailMessage = emailError ? "Email is required" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
-
-	const logIn = async () => {
-		setEmailError(false);
-		setPasswordError(false);
-		setSubmitted(true);
-		console.log("sign in attempt");
-		console.log("Email: " + emailInput);
-		console.log("Password: " + passwordInput);
-	};
 
 	async function fetchData() {
 		try {
@@ -50,24 +40,25 @@ function Login() {
 		}
 	}
 
-	useEffect(() => {
-		if (submitted) {
-			if (emailInput.trim() === "") {
-				setEmailError(true);
-			}
-			if (passwordInput.trim() === "") {
-				setPasswordError(true);
-			}
-			if (emailInput.trim() !== "" && passwordInput.trim() !== "") {
-				setMakeFetch(true);
-			}
+	const logIn = async () => {
+		console.log("sign in attempt");
+		console.log("Email: " + emailInput);
+		console.log("Password: " + passwordInput);
+
+		const emailInputErrorCheck = emailInput.trim() === "";
+		const passwordInputErrorCheck = passwordInput.trim() === "";
+
+		setEmailError(emailInputErrorCheck);
+		setPasswordError(passwordInputErrorCheck);
+
+		if (!emailInputErrorCheck && !passwordInputErrorCheck) {
+			setMakeFetch(true);
 		}
-	}, [submitted && !emailError && !passwordError]);
+	};
 
 	useEffect(() => {
 		if (makeFetch) {
 			fetchData();
-			setSubmitted(false);
 			setMakeFetch(false);
 		}
 	}, [makeFetch]);

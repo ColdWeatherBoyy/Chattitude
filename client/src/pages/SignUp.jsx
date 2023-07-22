@@ -15,7 +15,6 @@ function SignUp() {
 	const [matchError, setMatchError] = useState(false);
 	const [firstNameError, setFirstNameError] = useState(false);
 	const [lastNameError, setLastNameError] = useState(false);
-	const [submitted, setSubmitted] = useState(false);
 	const [makeFetch, setMakeFetch] = useState(false);
 
 	let emailMessage = emailError ? "Email is required" : "";
@@ -47,8 +46,13 @@ function SignUp() {
 				window.location.href = "/websockettest";
 			} else {
 				const errorData = await response.json();
-				console.log(errorData);
-				alert(errorData.error);
+				console.log(errorData.error.errors);
+				const errorArray = Object.entries(errorData.error.errors).map(
+					([field, error]) => {
+						return `${error.message}`;
+					}
+				);
+				alert(errorArray.join("\n"));
 			}
 		} catch (error) {
 			console.log(error);
@@ -56,61 +60,39 @@ function SignUp() {
 	}
 
 	const signIn = async () => {
-		setEmailError(false);
-		setPasswordError(false);
-		setConfirmError(false);
-		setMatchError(false);
-		setFirstNameError(false);
-		setLastNameError(false);
-		setSubmitted(true);
 		console.log("sign in attempt");
 		console.log("First Name: " + firstNameInput);
 		console.log("Last Name: " + lastNameInput);
 		console.log("Email: " + emailInput);
 		console.log("Password: " + passwordInput);
 		console.log("Password Confirmation: " + confirmInput);
-	};
 
-	useEffect(() => {
-		if (submitted) {
-			if (emailInput.trim() === "") {
-				setEmailError(true);
-			}
-			if (passwordInput.trim() === "") {
-				setPasswordError(true);
-			}
-			if (confirmInput.trim() === "") {
-				setConfirmError(true);
-			}
-			if (firstNameInput.trim() === "") {
-				setFirstNameError(true);
-			}
-			if (lastNameInput.trim() === "") {
-				setLastNameError(true);
-			}
-			if (passwordInput.trim() !== confirmInput.trim() && confirmInput.trim() !== "") {
-				setMatchError(true);
-			}
-			if (
-				!emailError &&
-				!passwordError &&
-				!confirmError &&
-				!matchError &&
-				!firstNameError &&
-				!lastNameError
-			) {
-				setMakeFetch(true);
-			}
+		const emailInputErrorCheck = emailInput.trim() === "";
+		const passwordInputErrorCheck = passwordInput.trim() === "";
+		const confirmInputErrorCheck = confirmInput.trim() === "";
+		const firstNameInputErrorCheck = firstNameInput.trim() === "";
+		const lastNameInputErrorCheck = lastNameInput.trim() === "";
+		const passwordMatchErrorCheck =
+			passwordInput.trim() !== confirmInput.trim() && confirmInput.trim() !== "";
+
+		setEmailError(emailInputErrorCheck);
+		setPasswordError(passwordInputErrorCheck);
+		setConfirmError(confirmInputErrorCheck);
+		setFirstNameError(firstNameInputErrorCheck);
+		setLastNameError(lastNameInputErrorCheck);
+		setMatchError(passwordMatchErrorCheck);
+
+		if (
+			!emailInputErrorCheck &&
+			!passwordInputErrorCheck &&
+			!confirmInputErrorCheck &&
+			!firstNameInputErrorCheck &&
+			!lastNameInputErrorCheck &&
+			!passwordMatchErrorCheck
+		) {
+			setMakeFetch(true);
 		}
-	}, [
-		submitted &&
-			!emailError &&
-			!passwordError &&
-			!confirmError &&
-			!matchError &&
-			!firstNameError &&
-			!lastNameError,
-	]);
+	};
 
 	useEffect(() => {
 		if (makeFetch) {
@@ -207,10 +189,7 @@ function SignUp() {
 						id="passwordConfirm"
 					/>
 					<Text pb={3} color="red.600">
-						{confirmMessage}
-					</Text>
-					<Text pb={3} color="red.600">
-						{matchMessage}
+						{confirmMessage} {matchMessage}
 					</Text>
 				</FormControl>
 				<BrandButton onClick={signIn}>Sign Up</BrandButton>

@@ -64,11 +64,6 @@ router.post("/post/create", async (req, res) => {
 			.status(200)
 			.json({ message: `Account for ${first_name} ${last_name} created!`, user, token });
 	} catch (err) {
-		if (err.code === 11000 && err.keyPattern && err.keyValue) {
-			// Duplicate key error for email field
-			const { email } = err.keyValue;
-			return res.status(400).json({ error: `Email '${email}' is already in use.` });
-		}
 		res.status(400).json({ error: err });
 	}
 });
