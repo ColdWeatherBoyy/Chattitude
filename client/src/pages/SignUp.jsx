@@ -47,11 +47,9 @@ function SignUp() {
 			} else {
 				const errorData = await response.json();
 				console.log(errorData.error.errors);
-				const errorArray = Object.entries(errorData.error.errors).map(
-					([field, error]) => {
-						return `${error.message}`;
-					}
-				);
+				const errorArray = Object.entries(errorData.error.errors).map(([error]) => {
+					return `${error.message}`;
+				});
 				alert(errorArray.join("\n"));
 			}
 		} catch (error) {
