@@ -2,7 +2,6 @@ import { Box, Heading, FormControl, FormLabel, Input, Text } from "@chakra-ui/re
 import { useEffect, useState } from "react";
 import BrandButton from "../components/BrandButton.jsx";
 import Header from "../components/Header.jsx";
-import { set } from "mongoose";
 
 function Login() {
 	const [emailInput, setEmailInput] = useState("");
@@ -10,8 +9,13 @@ function Login() {
 	const [emailError, setEmailError] = useState(false);
 	const [passwordError, setPasswordError] = useState(false);
 	const [makeFetch, setMakeFetch] = useState(false);
+	const [invalidEmail, setInvalidEmail] = useState(false);
+
 	let emailMessage = emailError ? "Email is required" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
+	let invalidEmailMessage = invalidEmail ? "Entered value is not a valid email" : "";
+
+	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 	async function fetchData() {
 		try {
@@ -47,11 +51,15 @@ function Login() {
 
 		const emailInputErrorCheck = emailInput.trim() === "";
 		const passwordInputErrorCheck = passwordInput.trim() === "";
+		const invalidEmailCheck = !emailPattern.test(emailInput);
 
 		setEmailError(emailInputErrorCheck);
 		setPasswordError(passwordInputErrorCheck);
+		if (!emailInputErrorCheck) {
+			setInvalidEmail(invalidEmailCheck);
+		}
 
-		if (!emailInputErrorCheck && !passwordInputErrorCheck) {
+		if (!emailInputErrorCheck && !passwordInputErrorCheck && !invalidEmailCheck) {
 			setMakeFetch(true);
 		}
 	};
@@ -90,11 +98,11 @@ function Login() {
 						placeholder="Email"
 						onChange={updateEmail}
 						onBlur={updateEmail}
-						isInvalid={emailError}
+						isInvalid={emailError || invalidEmail}
 						id="emailInput"
 					/>
 					<Text pb={3} color="red.600">
-						{emailMessage}
+						{emailMessage} {invalidEmailMessage}
 					</Text>
 					<FormLabel>Password</FormLabel>
 					<Input

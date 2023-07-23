@@ -10,6 +10,7 @@ function SignUp() {
 	const [passwordInput, setPasswordInput] = useState("");
 	const [confirmInput, setConfirmInput] = useState("");
 	const [emailError, setEmailError] = useState(false);
+	const [invalidEmail, setInvalidEmail] = useState(false); // TODO: implement email validation
 	const [passwordError, setPasswordError] = useState(false);
 	const [confirmError, setConfirmError] = useState(false);
 	const [matchError, setMatchError] = useState(false);
@@ -18,11 +19,14 @@ function SignUp() {
 	const [makeFetch, setMakeFetch] = useState(false);
 
 	let emailMessage = emailError ? "Email is required" : "";
+	let invalidEmailMessage = invalidEmail ? "Entered value is not a valid email" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
 	let confirmMessage = confirmError ? "Confirmation is required" : "";
 	let matchMessage = matchError ? "Passwords do not match" : "";
 	let firstNameMessage = firstNameError ? "First name is required" : "";
 	let lastNameMessage = lastNameError ? "Last name is required" : "";
+
+	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 	async function fetchData() {
 		try {
@@ -57,7 +61,7 @@ function SignUp() {
 		}
 	}
 
-	const signIn = async () => {
+	const signUp = async () => {
 		console.log("sign in attempt");
 		console.log("First Name: " + firstNameInput);
 		console.log("Last Name: " + lastNameInput);
@@ -66,6 +70,7 @@ function SignUp() {
 		console.log("Password Confirmation: " + confirmInput);
 
 		const emailInputErrorCheck = emailInput.trim() === "";
+		const invalidEmailCheck = !emailPattern.test(emailInput);
 		const passwordInputErrorCheck = passwordInput.trim() === "";
 		const confirmInputErrorCheck = confirmInput.trim() === "";
 		const firstNameInputErrorCheck = firstNameInput.trim() === "";
@@ -79,6 +84,9 @@ function SignUp() {
 		setFirstNameError(firstNameInputErrorCheck);
 		setLastNameError(lastNameInputErrorCheck);
 		setMatchError(passwordMatchErrorCheck);
+		if (!emailInputErrorCheck) {
+			setInvalidEmail(invalidEmailCheck);
+		}
 
 		if (
 			!emailInputErrorCheck &&
@@ -86,7 +94,8 @@ function SignUp() {
 			!confirmInputErrorCheck &&
 			!firstNameInputErrorCheck &&
 			!lastNameInputErrorCheck &&
-			!passwordMatchErrorCheck
+			!passwordMatchErrorCheck &&
+			!invalidEmailCheck
 		) {
 			setMakeFetch(true);
 		}
@@ -159,11 +168,11 @@ function SignUp() {
 						placeholder="Email"
 						onChange={updateEmail}
 						onBlur={updateEmail}
-						isInvalid={emailError}
+						isInvalid={emailError || invalidEmail}
 						id="email"
 					/>
 					<Text pb={3} color="red.600">
-						{emailMessage}
+						{emailMessage} {invalidEmailMessage}
 					</Text>
 					<FormLabel>Password</FormLabel>
 					<Input
@@ -190,7 +199,7 @@ function SignUp() {
 						{confirmMessage} {matchMessage}
 					</Text>
 				</FormControl>
-				<BrandButton onClick={signIn}>Sign Up</BrandButton>
+				<BrandButton onClick={signUp}>Sign Up</BrandButton>
 			</Box>
 		</>
 	);
