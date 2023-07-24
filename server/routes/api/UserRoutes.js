@@ -13,18 +13,18 @@ router.get("/get/:id", auth, async (req, res) => {
 		const authenticatedUser = await User.findById(req.user.data._id);
 
 		if (!authenticatedUser) {
-			return res.status(404).send("Authenticated user not found.");
+			return res.status(404).send({ error: "Authenticated user not found." });
 		}
 
 		const user = await User.findById(req.params.id);
 
 		if (!user) {
-			return res.status(404).send("User not found.");
+			return res.status(404).send({ error: "User not found." });
 		}
 
 		res.json(user);
 	} catch (err) {
-		res.status(400).json(err);
+		res.status(400).json({ error: err });
 	}
 });
 
@@ -35,13 +35,13 @@ router.get("/get", auth, async (req, res) => {
 		const authenticatedUser = await User.findById(req.user.data._id);
 
 		if (!authenticatedUser) {
-			return res.status(404).send("Authenticated user not found.");
+			return res.status(404).send({ error: "Authenticated user not found." });
 		}
 
 		const users = await User.find({});
 		res.json(users);
 	} catch (err) {
-		res.status(400).json(err);
+		res.status(400).json({ error: err });
 	}
 });
 
@@ -64,12 +64,7 @@ router.post("/post/create", async (req, res) => {
 			.status(200)
 			.json({ message: `Account for ${first_name} ${last_name} created!`, user, token });
 	} catch (err) {
-		if (err.code === 11000 && err.keyPattern && err.keyValue) {
-			// Duplicate key error for email field
-			const { email } = err.keyValue;
-			return res.status(400).json({ error: `Email '${email}' is already in use.` });
-		}
-		res.status(400).json(err);
+		res.status(400).json({ error: err });
 	}
 });
 
@@ -82,21 +77,21 @@ router.post("/post/login", async (req, res) => {
 		const user = await User.findOne({ email });
 
 		if (!user) {
-			return res.status(400).send("Email not found.");
+			return res.status(400).send({ error: "Email not found." });
 		}
 
 		const verified = await user.isCorrectPassword(password);
 
 		if (!verified) {
-			return res.status(400).send("Password does not match.");
+			return res.status(400).send({ error: "Password does not match." });
 		}
 
 		// add JWT here
 		const token = signToken(user);
 
 		res.json({ message: "Login successful!", token, user });
-	} catch (err) {
-		res.status(400).json(err);
+	} catch (error) {
+		res.status(400).json(error);
 	}
 });
 
@@ -136,7 +131,7 @@ router.put("/put/", auth, async (req, res) => {
 		let changes = 0;
 
 		if (!user) {
-			return res.status(404).send("User not found.");
+			return res.status(404).send({ error: "User not found." });
 		}
 
 		// Checks to see if new first name, last name, or email is provided and if it is different from existing info
@@ -162,17 +157,17 @@ router.put("/put/", auth, async (req, res) => {
 				return res.status(400).send("Please confirm your new password.");
 			} else if (newPassword !== confirmationNewPassword) {
 				// confirmation that new password typed twice matches
-				return res.status(400).send("New passwords don't match.");
+				return res.status(400).send({ error: "New passwords don't match." });
 			} else if (!existingPassword) {
 				// if resetting password, asks for existing password and new password typed twice
-				return res.status(400).send("Please enter your existing password.");
+				return res.status(400).send({ error: "Please enter your existing password." });
 			} else {
 				const verified = await user.isCorrectPassword(existingPassword);
 
 				if (!verified) {
 					return res
 						.status(400)
-						.send("Your existing password is incorrect. Please try again.");
+						.send({ error: "Your existing password is incorrect. Please try again." });
 				} else {
 					user.password = newPassword;
 					changes++;
@@ -181,10 +176,8 @@ router.put("/put/", auth, async (req, res) => {
 		}
 
 		if (changes === 0) {
-			return res.status(400).send("All info provided same as existing info.");
+			return res.status(400).send({ error: "All info provided same as existing info." });
 		}
-
-		console.log("hello", user);
 
 		// Finally, update user info with new info
 		const updatedUser = await user.save();
@@ -193,8 +186,8 @@ router.put("/put/", auth, async (req, res) => {
 			message: `Account for ${updatedUser.first_name} ${updatedUser.last_name} updated!`,
 			updatedUser,
 		});
-	} catch (err) {
-		return res.status(400).json(err);
+	} catch (error) {
+		return res.status(400).json(error);
 	}
 });
 
@@ -212,21 +205,21 @@ router.delete("/delete", auth, async (req, res) => {
 		const user = await User.findById(req.user.data._id);
 
 		if (!user) {
-			return res.status(404).send("User not found.");
+			return res.status(404).send({ error: "User not found." });
 		}
 
 		const verification = await user.isCorrectPassword(confirmationPassword);
 
 		if (!verification) {
-			return res.status(400).send("Password does not match user record.");
+			return res.status(400).send({ error: "Password does not match user record." });
 		}
 
 		const deletedUser = await User.findByIdAndDelete(req.user.data._id);
 		res.status(200).json({
 			message: `Account for ${deletedUser.first_name} ${deletedUser.last_name} deleted!`,
 		});
-	} catch (err) {
-		res.status(400).json(err);
+	} catch (error) {
+		res.status(400).json(error);
 	}
 });
 

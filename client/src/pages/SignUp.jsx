@@ -1,56 +1,112 @@
-import {
-	Box,
-	Heading,
-	FormControl,
-	FormLabel,
-	Input,
-	Button,
-	Text,
-} from "@chakra-ui/react";
-import { useState } from "react";
+import { Box, Heading, FormControl, FormLabel, Input, Text } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import Header from "../components/Header.jsx";
 import BrandButton from "../components/BrandButton.jsx";
 
 function SignUp() {
-	const [firstNameInput, setFirstNameInput] = useState(" ");
-	const [lastNameInput, setLastNameInput] = useState(" ");
-	const [emailInput, setEmailInput] = useState(" ");
-	const [passwordInput, setPasswordInput] = useState(" ");
-	const [confirmInput, setConfirmInput] = useState(" ");
-	let firstNameError = firstNameInput === "";
-	let lastNameError = lastNameInput === "";
-	let emailError = emailInput === "";
-	let passwordError = passwordInput === "";
-	let confirmError = confirmInput === "";
+	const [firstNameInput, setFirstNameInput] = useState("");
+	const [lastNameInput, setLastNameInput] = useState("");
+	const [emailInput, setEmailInput] = useState("");
+	const [passwordInput, setPasswordInput] = useState("");
+	const [confirmInput, setConfirmInput] = useState("");
+	const [emailError, setEmailError] = useState(false);
+	const [invalidEmail, setInvalidEmail] = useState(false); // TODO: implement email validation
+	const [passwordError, setPasswordError] = useState(false);
+	const [confirmError, setConfirmError] = useState(false);
+	const [matchError, setMatchError] = useState(false);
+	const [firstNameError, setFirstNameError] = useState(false);
+	const [lastNameError, setLastNameError] = useState(false);
+	const [makeFetch, setMakeFetch] = useState(false);
+
 	let emailMessage = emailError ? "Email is required" : "";
+	let invalidEmailMessage = invalidEmail ? "Entered value is not a valid email" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
 	let confirmMessage = confirmError ? "Confirmation is required" : "";
+	let matchMessage = matchError ? "Passwords do not match" : "";
 	let firstNameMessage = firstNameError ? "First name is required" : "";
 	let lastNameMessage = lastNameError ? "Last name is required" : "";
 
-	const signIn = () => {
-		if (emailInput === " ") {
-			emailError = true;
+	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+	async function fetchData() {
+		try {
+			const response = await fetch("/api/user/post/create", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					first_name: firstNameInput,
+					last_name: lastNameInput,
+					email: emailInput,
+					password: passwordInput,
+				}),
+			});
+			if (response.ok) {
+				const data = await response.json();
+				// store token in cookies
+				document.cookie = `token=${data.token}`;
+				// redirect to messages
+				window.location.href = "/websockettest";
+			} else {
+				const errorData = await response.json();
+				console.log(errorData.error.errors);
+				const errorArray = Object.entries(errorData.error.errors).map(([error]) => {
+					return `${error.message}`;
+				});
+				alert(errorArray.join("\n"));
+			}
+		} catch (error) {
+			console.log(error);
 		}
-		if (passwordInput === " ") {
-			passwordError = true;
-		}
-		if (confirmInput === " ") {
-			confirmError = true;
-		}
-		if (firstNameInput === " ") {
-			firstNameError = true;
-		}
-		if (lastNameInput === " ") {
-			lastNameError = true;
-		}
+	}
+
+	const signUp = async () => {
 		console.log("sign in attempt");
 		console.log("First Name: " + firstNameInput);
 		console.log("Last Name: " + lastNameInput);
 		console.log("Email: " + emailInput);
 		console.log("Password: " + passwordInput);
 		console.log("Password Confirmation: " + confirmInput);
+
+		const emailInputErrorCheck = emailInput.trim() === "";
+		const invalidEmailCheck = !emailPattern.test(emailInput);
+		const passwordInputErrorCheck = passwordInput.trim() === "";
+		const confirmInputErrorCheck = confirmInput.trim() === "";
+		const firstNameInputErrorCheck = firstNameInput.trim() === "";
+		const lastNameInputErrorCheck = lastNameInput.trim() === "";
+		const passwordMatchErrorCheck =
+			passwordInput.trim() !== confirmInput.trim() && confirmInput.trim() !== "";
+
+		setEmailError(emailInputErrorCheck);
+		setPasswordError(passwordInputErrorCheck);
+		setConfirmError(confirmInputErrorCheck);
+		setFirstNameError(firstNameInputErrorCheck);
+		setLastNameError(lastNameInputErrorCheck);
+		setMatchError(passwordMatchErrorCheck);
+		if (!emailInputErrorCheck) {
+			setInvalidEmail(invalidEmailCheck);
+		}
+
+		if (
+			!emailInputErrorCheck &&
+			!passwordInputErrorCheck &&
+			!confirmInputErrorCheck &&
+			!firstNameInputErrorCheck &&
+			!lastNameInputErrorCheck &&
+			!passwordMatchErrorCheck &&
+			!invalidEmailCheck
+		) {
+			setMakeFetch(true);
+		}
 	};
+
+	useEffect(() => {
+		if (makeFetch) {
+			fetchData();
+			setMakeFetch(false);
+		}
+	}, [makeFetch]);
 
 	const updateEmail = (event) => {
 		setEmailInput(event.currentTarget.value);
@@ -91,6 +147,7 @@ function SignUp() {
 						onChange={updateFirstName}
 						onBlur={updateFirstName}
 						isInvalid={firstNameError}
+						id="firstName"
 					/>
 					<Text pb={3} color="red.600">
 						{firstNameMessage}
@@ -101,6 +158,7 @@ function SignUp() {
 						onChange={updateLastName}
 						onBlur={updateLastName}
 						isInvalid={lastNameError}
+						id="lastName"
 					/>
 					<Text pb={3} color="red.600">
 						{lastNameMessage}
@@ -110,10 +168,11 @@ function SignUp() {
 						placeholder="Email"
 						onChange={updateEmail}
 						onBlur={updateEmail}
-						isInvalid={emailError}
+						isInvalid={emailError || invalidEmail}
+						id="email"
 					/>
 					<Text pb={3} color="red.600">
-						{emailMessage}
+						{emailMessage} {invalidEmailMessage}
 					</Text>
 					<FormLabel>Password</FormLabel>
 					<Input
@@ -122,6 +181,7 @@ function SignUp() {
 						onChange={updatePassword}
 						onBlur={updatePassword}
 						isInvalid={passwordError}
+						id="password"
 					/>
 					<Text pb={3} color="red.600">
 						{passwordMessage}
@@ -132,13 +192,14 @@ function SignUp() {
 						placeholder="Confirm Password"
 						onChange={updateConfirm}
 						onBlur={updateConfirm}
-						isInvalid={confirmError}
+						isInvalid={confirmError || matchError}
+						id="passwordConfirm"
 					/>
 					<Text pb={3} color="red.600">
-						{confirmMessage}
+						{confirmMessage} {matchMessage}
 					</Text>
 				</FormControl>
-				<BrandButton onClick={signIn}>Sign Up</BrandButton>
+				<BrandButton onClick={signUp}>Sign Up</BrandButton>
 			</Box>
 		</>
 	);
