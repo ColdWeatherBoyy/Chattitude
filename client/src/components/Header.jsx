@@ -1,5 +1,5 @@
-import { Box, Heading, Text } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Link as ReactRouterLink } from "react-router-dom";
+import { Box, Heading, Text, Link } from "@chakra-ui/react";
 
 function Header() {
 	return (
@@ -15,12 +15,14 @@ function Header() {
 				px={5}
 				color="white"
 			>
-				<Heading>Chattitude</Heading>
+				<Link as={ReactRouterLink} to="/">
+					<Heading>Chattitude</Heading>
+				</Link>
 				<Box display="flex" flexDirection="row">
-					<Link to="/login">
+					<Link as={ReactRouterLink} to="/login">
 						<Text mx={3}>Login</Text>
 					</Link>
-					<Link to="/signup">
+					<Link as={ReactRouterLink} to="/signup">
 						<Text mx={3}>Sign Up</Text>
 					</Link>
 				</Box>

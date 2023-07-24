@@ -8,6 +8,7 @@ import WebSocketTest from "./pages/WebSocketTest.jsx";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme/theme.js";
 import "./index.css";
+import "./theme/fonts.css";
 
 const router = createBrowserRouter([
 	{
