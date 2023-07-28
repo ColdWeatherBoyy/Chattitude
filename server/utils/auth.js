@@ -5,9 +5,9 @@ const secret = process.env.SECRET;
 const expiration = "48h";
 
 module.exports = {
-	signToken: function ({ _id, first_name, password }) {
-		console.log(_id, first_name, password);
-		return jwt.sign({ id: _id, first_name, password }, secret, {
+	signToken: function ({ _id, first_name }) {
+		console.log(_id, first_name);
+		return jwt.sign({ id: _id, first_name }, secret, {
 			expiresIn: expiration,
 		});
 	},
