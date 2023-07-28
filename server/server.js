@@ -15,10 +15,6 @@ const uuidv4 = require("uuid").v4;
 const wsServer = new WebSocketServer({ server });
 const PORT = process.env.PORT || 3001;
 
-// server.listen(port, () => {
-// 	console.log(`WebSocket server is running on port ${port}`);
-// });
-
 // object tracks client connections
 const clients = {};
 // object tracks users
@@ -46,10 +42,10 @@ function handleMessage(message, userId) {
 
 	if (dataFromClient.type === "userevent") {
 		users[userId] = dataFromClient;
-		chatMessages.push(`${dataFromClient.username} joined the chat`);
+		chatMessages.push(`${dataFromClient.first_name} joined the chat`);
 		json.data = { users, chatMessages };
 	} else if (dataFromClient.type === "chatevent") {
-		chatMessages.push(`${dataFromClient.username}: ${dataFromClient.content}`);
+		chatMessages.push(`${dataFromClient.first_name}: ${dataFromClient.content}`);
 		editorContent = dataFromClient.content;
 		json.data = { editorContent, chatMessages };
 	}
@@ -73,7 +69,7 @@ function handleDisconnect(userId) {
 wsServer.on("connection", function (connection) {
 	// Generate a unique code for every user
 	const userId = uuidv4();
-	console.log("Recieved a new connection");
+	console.log("Received a new connection");
 
 	// Store the new connection and handle messages
 	clients[userId] = connection;

@@ -43,10 +43,6 @@ function SignUp() {
 				}),
 			});
 			if (response.ok) {
-				const data = await response.json();
-				// store token in cookies
-				document.cookie = `token=${data.token}`;
-				// redirect to messages
 				window.location.href = "/websockettest";
 			} else {
 				const errorData = await response.json();

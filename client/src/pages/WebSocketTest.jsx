@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import useWebSocket from "react-use-websocket";
 
 import { Box, Input, Button, Text } from "@chakra-ui/react";
 import Messages from "../components/Messages";
@@ -7,48 +7,65 @@ import Messages from "../components/Messages";
 const WS_URL = "ws://127.0.0.1:3001";
 
 const WebSocketTest = () => {
-	const [username, setUsername] = useState("");
+	const [firstName, setFirstName] = useState("");
 	const [connectionState, setConnectionState] = useState(false);
-	const [loginState, setLoginState] = useState(false);
 	const [chatMessage, setChatMessage] = useState("");
 
-	const { sendJsonMessage, readyState } = useWebSocket(WS_URL, {
-		onOpen: () => {
-			setConnectionState(true);
-			console.log("WebSocket connection established");
-		},
-		share: true,
-		filter: () => false,
-		retryOnError: true,
-		shouldReconnect: () => true,
-	});
+	useEffect(() => {
+		const validateToken = async () => {
+			try {
+				const response = await fetch("/api/user/validate", {
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+					},
+				});
+				if (!response.ok) throw new Error("Invalid token");
+				const data = await response.json();
+				setFirstName(data.user.first_name);
+				sendJsonMessage({
+					first_name: data.user.first_name,
+					type: "userevent",
+				});
+			} catch (error) {
+				console.error(error);
+				// redirect to login page
+				window.location.href = "/login";
+			}
+		};
+		validateToken();
+	}, []);
 
-	function handleUsernameChange(event) {
-		setUsername(event.target.value);
-	}
-
-	function handleLogin() {
-		if (!username) return;
-		sendJsonMessage({
-			username,
-			type: "userevent",
-		});
-		setLoginState(true);
-		document.getElementById("username-field").disabled = true;
-		document.getElementById("login-button").disabled = true;
-	}
+	const { sendJsonMessage, readyState, lastMessage, getWebsocket } = useWebSocket(
+		WS_URL,
+		{
+			onOpen: () => {
+				setConnectionState(true);
+				console.log("WebSocket connection established");
+			},
+			share: true,
+			retryOnError: true,
+			shouldReconnect: () => true,
+		}
+	);
 
 	function handleChatMessageChange() {
 		setChatMessage(document.getElementById("chat-message-field").value);
 	}
 
 	function handleSendMessage() {
-		sendJsonMessage({
-			username,
-			content: chatMessage,
-			type: "chatevent",
-		});
-		setChatMessage("");
+		if (readyState !== 1) {
+			console.log("WebSocket not connected");
+		} else if (!chatMessage) {
+			console.log("No message to send");
+		} else {
+			sendJsonMessage({
+				first_name: firstName,
+				content: chatMessage,
+				type: "chatevent",
+			});
+			setChatMessage("");
+		}
 	}
 
 	return (
@@ -60,17 +77,6 @@ const WebSocketTest = () => {
 					padding: "20px",
 				}}
 			>
-				<Text>Enter username here:</Text>
-				<Input
-					id="username-field"
-					onChange={handleUsernameChange}
-					onKeyUp={(event) => {
-						if (event.key === "Enter") handleLogin();
-					}}
-				/>
-				<Button id="login-button" onClick={handleLogin}>
-					Login
-				</Button>
 				<Box
 					style={{
 						border: "1px solid green",
@@ -79,26 +85,22 @@ const WebSocketTest = () => {
 					<Text>
 						Connection Status: {connectionState ? "connected" : "not connected"}
 					</Text>
-					<Text>Login Status: {loginState ? "logged in" : "not logged in"}</Text>
+					<Text></Text>
 				</Box>
 
-				{loginState && (
-					<>
-						<Text>Messages:</Text>
-						<Messages WS_URL={WS_URL} />
-						<Input
-							id="chat-message-field"
-							onChange={handleChatMessageChange}
-							value={chatMessage}
-							onKeyUp={(event) => {
-								if (event.key === "Enter") handleSendMessage();
-							}}
-						/>
-						<Button id="chat-send-button" onClick={handleSendMessage}>
-							Send
-						</Button>
-					</>
-				)}
+				<Text>Messages:</Text>
+				<Messages WS_URL={WS_URL} />
+				<Input
+					id="chat-message-field"
+					onChange={handleChatMessageChange}
+					value={chatMessage}
+					onKeyUp={(event) => {
+						if (event.key === "Enter") handleSendMessage();
+					}}
+				/>
+				<Button id="chat-send-button" onClick={handleSendMessage}>
+					Send
+				</Button>
 			</Box>
 		</>
 	);
