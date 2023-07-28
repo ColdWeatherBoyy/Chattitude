@@ -15,10 +15,6 @@ const uuidv4 = require("uuid").v4;
 const wsServer = new WebSocketServer({ server });
 const PORT = process.env.PORT || 3001;
 
-// server.listen(port, () => {
-// 	console.log(`WebSocket server is running on port ${port}`);
-// });
-
 // object tracks client connections
 const clients = {};
 // object tracks users
@@ -46,10 +42,10 @@ function handleMessage(message, userId) {
 
 	if (dataFromClient.type === "userevent") {
 		users[userId] = dataFromClient;
-		chatMessages.push(`${dataFromClient.username} joined the chat`);
+		chatMessages.push(`${dataFromClient.first_name} joined the chat`);
 		json.data = { users, chatMessages };
 	} else if (dataFromClient.type === "chatevent") {
-		chatMessages.push(`${dataFromClient.username}: ${dataFromClient.content}`);
+		chatMessages.push(`${dataFromClient.first_name}: ${dataFromClient.content}`);
 		editorContent = dataFromClient.content;
 		json.data = { editorContent, chatMessages };
 	}
@@ -61,7 +57,7 @@ function handleMessage(message, userId) {
 function handleDisconnect(userId) {
 	console.log(`${userId} disconnected`);
 	const json = { type: "userevent" };
-	const username = users[userId]?.username || userId;
+	const username = users[userId]?.first_name || userId;
 	chatMessages.push(`${username} left the chat`);
 	json.data = { users, chatMessages };
 	delete clients[userId];
@@ -73,7 +69,7 @@ function handleDisconnect(userId) {
 wsServer.on("connection", function (connection) {
 	// Generate a unique code for every user
 	const userId = uuidv4();
-	console.log("Recieved a new connection");
+	console.log("Received a new connection");
 
 	// Store the new connection and handle messages
 	clients[userId] = connection;

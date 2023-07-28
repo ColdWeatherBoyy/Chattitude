@@ -45,6 +45,24 @@ router.get("/get", auth, async (req, res) => {
 	}
 });
 
+// validate token route
+// /api/user/get/validate
+router.get("/validate/", auth, async (req, res) => {
+	try {
+		const decoded = req.user;
+		if (!decoded) {
+			return res.status(400).send({ error: "Invalid token." });
+		}
+		const user = await User.findById(decoded.id).select("-password");
+		if (!user) {
+			return res.status(404).send({ error: "User not found." });
+		}
+		res.json({ message: "Token validated!", user });
+	} catch (error) {
+		res.status(400).json(error);
+	}
+});
+
 // **************************
 // *** User Post Routes ***
 // **************************
@@ -60,9 +78,12 @@ router.post("/post/create", async (req, res) => {
 		// add JWT here
 		const token = signToken(user);
 
+		// http only cookie
+		res.cookie("token", token, { httpOnly: true });
+
 		res
 			.status(200)
-			.json({ message: `Account for ${first_name} ${last_name} created!`, user, token });
+			.json({ message: `Account for ${first_name} ${last_name} created!`, user });
 	} catch (err) {
 		res.status(400).json({ error: err });
 	}
@@ -89,7 +110,9 @@ router.post("/post/login", async (req, res) => {
 		// add JWT here
 		const token = signToken(user);
 
-		res.json({ message: "Login successful!", token, user });
+		res.cookie("token", token, { httpOnly: true });
+
+		res.json({ message: "Login successful!", user });
 	} catch (error) {
 		res.status(400).json(error);
 	}
