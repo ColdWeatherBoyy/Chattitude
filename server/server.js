@@ -57,7 +57,7 @@ function handleMessage(message, userId) {
 function handleDisconnect(userId) {
 	console.log(`${userId} disconnected`);
 	const json = { type: "userevent" };
-	const username = users[userId]?.username || userId;
+	const username = users[userId]?.first_name || userId;
 	chatMessages.push(`${username} left the chat`);
 	json.data = { users, chatMessages };
 	delete clients[userId];
