@@ -43,11 +43,13 @@ function handleMessage(message, userId) {
 	if (dataFromClient.type === "userevent") {
 		if (!users[userId]) {
 			users[userId] = dataFromClient;
-			chatMessages.push(`${dataFromClient.first_name} joined the chat`);
+			const { first_name } = dataFromClient;
+			chatMessages.push(`${first_name} joined the chat`);
 		}
 		json.data = { users, chatMessages };
 	} else if (dataFromClient.type === "chatevent") {
-		chatMessages.push(`${dataFromClient.first_name}: ${dataFromClient.content}`);
+		const { first_name, content } = dataFromClient;
+		chatMessages.push(`${first_name}: ${content}`);
 		json.data = { chatMessages };
 	}
 
