@@ -56,10 +56,16 @@ function handleMessage(message, userId) {
 
 // websocket disconnect
 function handleDisconnect(userId) {
+	const user = users[userId];
+
+	if (!user) {
+		return;
+	}
+
+	const { first_name } = user;
 	const json = { type: "userevent" };
-	const username = users[userId]?.first_name || userId;
-	console.log(username, " disconnected");
-	chatMessages.push(`${username} left the chat`);
+	console.log(first_name, " disconnected");
+	chatMessages.push(`${first_name} left the chat`);
 	json.data = { users, chatMessages };
 	delete clients[userId];
 	delete users[userId];
