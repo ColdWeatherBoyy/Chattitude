@@ -48,8 +48,7 @@ function handleMessage(message, userId) {
 		json.data = { users, chatMessages };
 	} else if (dataFromClient.type === "chatevent") {
 		chatMessages.push(`${dataFromClient.first_name}: ${dataFromClient.content}`);
-		editorContent = dataFromClient.content;
-		json.data = { editorContent, chatMessages };
+		json.data = { chatMessages };
 	}
 
 	broadcastMessage(json);
@@ -57,10 +56,9 @@ function handleMessage(message, userId) {
 
 // websocket disconnect
 function handleDisconnect(userId) {
-	console.log(`${userId} disconnected`);
 	const json = { type: "userevent" };
 	const username = users[userId]?.first_name || userId;
-	console.log(username);
+	console.log(username, " disconnected");
 	chatMessages.push(`${username} left the chat`);
 	json.data = { users, chatMessages };
 	delete clients[userId];
@@ -73,10 +71,8 @@ wsServer.on("connection", function (connection) {
 	// Generate a unique code for every user
 	const userId = uuidv4();
 	console.log("Received a new connection");
-
 	// Store the new connection and handle messages
 	clients[userId] = connection;
-	console.log(`${userId} connected.`);
 	connection.on("message", (message) => handleMessage(message, userId));
 	// User disconnected
 	connection.on("close", () => handleDisconnect(userId));
