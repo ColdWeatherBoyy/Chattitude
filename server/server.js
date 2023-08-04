@@ -41,8 +41,10 @@ function handleMessage(message, userId) {
 	const json = { type: dataFromClient.type };
 
 	if (dataFromClient.type === "userevent") {
-		users[userId] = dataFromClient;
-		chatMessages.push(`${dataFromClient.first_name} joined the chat`);
+		if (!users[userId]) {
+			users[userId] = dataFromClient;
+			chatMessages.push(`${dataFromClient.first_name} joined the chat`);
+		}
 		json.data = { users, chatMessages };
 	} else if (dataFromClient.type === "chatevent") {
 		chatMessages.push(`${dataFromClient.first_name}: ${dataFromClient.content}`);
@@ -58,6 +60,7 @@ function handleDisconnect(userId) {
 	console.log(`${userId} disconnected`);
 	const json = { type: "userevent" };
 	const username = users[userId]?.first_name || userId;
+	console.log(username);
 	chatMessages.push(`${username} left the chat`);
 	json.data = { users, chatMessages };
 	delete clients[userId];
