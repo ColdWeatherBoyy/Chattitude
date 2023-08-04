@@ -44,7 +44,6 @@ function handleMessage(message, userId) {
 	const json = { type: dataFromClient.type };
 
 	const timestamp = getTimestamp();
-	console.log(timestamp);
 
 	if (dataFromClient.type === "userevent") {
 		if (!users[userId]) {

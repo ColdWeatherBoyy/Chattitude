@@ -22,14 +22,12 @@ const Messages = ({ WS_URL }) => {
 					messages.map((message, index) => {
 						const { timestamp, content } = message;
 						return (
-							<>
-								<Box key={`message${index}`}>
-									{content}
-									<span style={{ fontSize: "0.6rem", color: "grey", float: "right" }}>
-										{timestamp}
-									</span>
-								</Box>
-							</>
+							<Box key={`message${index}`}>
+								{content}
+								<span style={{ fontSize: "0.6rem", color: "grey", float: "right" }}>
+									{timestamp}
+								</span>
+							</Box>
 						);
 					})}
 			</Box>
