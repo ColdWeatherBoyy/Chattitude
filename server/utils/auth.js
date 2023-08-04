@@ -12,12 +12,21 @@ module.exports = {
 		});
 	},
 	auth: function (req, res, next) {
-		const token = req.headers.cookie.split("=")[1] || "";
-		if (!token) {
+		const tokenCookie = req.headers.cookie
+			? req.headers.cookie
+					.split(";")
+					.find((cookie) => cookie.trim().startsWith("chattitude-token="))
+			: null;
+		console.log(tokenCookie);
+		if (!tokenCookie) {
 			return res.status(401).json({ message: "No token, authorization denied" });
 		}
 		try {
-			const verified = jwt.verify(token, secret, { maxAge: expiration });
+			const token = tokenCookie.split("=")[1];
+			console.log(token);
+			const verified = jwt.verify(token, secret, {
+				maxAge: expiration,
+			});
 			req.user = verified;
 			next();
 		} catch (err) {

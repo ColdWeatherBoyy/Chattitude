@@ -46,7 +46,7 @@ router.get("/get", auth, async (req, res) => {
 });
 
 // validate token route
-// /api/user/get/validate
+// /api/user/validate
 router.get("/validate/", auth, async (req, res) => {
 	try {
 		const decoded = req.user;
@@ -79,7 +79,7 @@ router.post("/post/create", async (req, res) => {
 		const token = signToken(user);
 
 		// http only cookie
-		res.cookie("token", token, { httpOnly: true });
+		res.cookie("chattitude-token", token, { httpOnly: true });
 
 		res
 			.status(200)
@@ -110,7 +110,7 @@ router.post("/post/login", async (req, res) => {
 		// add JWT here
 		const token = signToken(user);
 
-		res.cookie("token", token, { httpOnly: true });
+		res.cookie("chattitude-token", token, { httpOnly: true });
 
 		res.json({ message: "Login successful!", user });
 	} catch (error) {
