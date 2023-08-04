@@ -8,6 +8,8 @@ const Messages = ({ WS_URL }) => {
 
 	const messages = lastJsonMessage?.data.chatMessages || [];
 
+	const time = new Date().toLocaleTimeString();
+
 	return (
 		<>
 			<Box
@@ -18,7 +20,17 @@ const Messages = ({ WS_URL }) => {
 			>
 				{messages &&
 					messages.map((message, index) => {
-						return <Box key={`message${index}`}>{message}</Box>;
+						const { timestamp, content } = message;
+						return (
+							<>
+								<Box key={`message${index}`}>
+									{content}
+									<span style={{ fontSize: "0.6rem", color: "grey", float: "right" }}>
+										{timestamp}
+									</span>
+								</Box>
+							</>
+						);
 					})}
 			</Box>
 		</>

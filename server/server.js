@@ -5,7 +5,7 @@
 // COMBINED SETUP
 const path = require("path");
 const express = require("express");
-const { createServer } = require("http");
+const { createServer, get } = require("http");
 require("dotenv").config();
 
 const { WebSocket, WebSocketServer } = require("ws");
@@ -14,6 +14,8 @@ const server = createServer(app);
 const uuidv4 = require("uuid").v4;
 const wsServer = new WebSocketServer({ server });
 const PORT = process.env.PORT || 3001;
+
+const { getTimestamp } = require("./utils/getTimestamp");
 
 // object tracks client connections
 const clients = {};
@@ -36,27 +38,24 @@ function broadcastMessage(json) {
 }
 
 // message
+
 function handleMessage(message, userId) {
 	const dataFromClient = JSON.parse(message.toString());
 	const json = { type: dataFromClient.type };
 
-	const time = new Date();
-	const hours = time.getHours();
-	const minutes = time.getMinutes();
-	const seconds =
-		time.getSeconds().length === 1 ? `0${time.getSeconds()}` : time.getSeconds();
-	const timestamp = `${hours}:${minutes}:${seconds}`;
+	const timestamp = getTimestamp();
+	console.log(timestamp);
 
 	if (dataFromClient.type === "userevent") {
 		if (!users[userId]) {
 			users[userId] = dataFromClient;
 			const { first_name } = dataFromClient;
-			chatMessages.push(`${timestamp} ${first_name} joined the chat`);
+			chatMessages.push({ timestamp, content: `${first_name} joined the chat` });
 		}
 		json.data = { users, chatMessages };
 	} else if (dataFromClient.type === "chatevent") {
 		const { first_name, content } = dataFromClient;
-		chatMessages.push(`${timestamp} ${first_name}: ${content}`);
+		chatMessages.push({ timestamp, content: `${first_name}: ${content}` });
 		json.data = { chatMessages };
 	}
 
@@ -71,17 +70,12 @@ function handleDisconnect(userId) {
 		return;
 	}
 
-	const time = new Date();
-	const hours = time.getHours();
-	const minutes = time.getMinutes();
-	const seconds =
-		time.getSeconds().length === 1 ? `0${time.getSeconds()}` : time.getSeconds();
-	const timestamp = `${hours}:${minutes}:${seconds}`;
+	const timestamp = getTimestamp();
 
 	const { first_name } = user;
 	const json = { type: "userevent" };
 	console.log(first_name, " disconnected");
-	chatMessages.push(`${timestamp} ${first_name} left the chat`);
+	chatMessages.push({ timestamp, content: `${first_name} left the chat` });
 	json.data = { users, chatMessages };
 	delete clients[userId];
 	delete users[userId];
