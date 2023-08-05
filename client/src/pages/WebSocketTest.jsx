@@ -39,6 +39,7 @@ const WebSocketTest = () => {
 				setUserId(userId);
 				sendJsonMessage({
 					first_name: firstName,
+					content: `${firstName} has joined the chat`,
 					type: "userevent",
 				});
 			} catch (error) {
@@ -78,13 +79,11 @@ const WebSocketTest = () => {
 			console.log("No message to send");
 		} else {
 			const content = chatMessage;
-			const first_name = firstName;
-			const type = "chatevent";
 
 			sendJsonMessage({
-				first_name,
+				first_name: firstName,
 				content,
-				type,
+				type: "chatevent",
 			});
 
 			saveMessageInDb(content, userId);
@@ -92,6 +91,16 @@ const WebSocketTest = () => {
 			setChatMessage("");
 		}
 	}
+
+	// const handleLastJsonMessage = (message) => {
+	// 	if (message) {
+	// 		console.log("weiner: " + JSON.stringify(message));
+	// 	}
+	// };
+
+	// useEffect(() => {
+	// 	handleLastJsonMessage(lastJsonMessage);
+	// }, [lastJsonMessage]);
 
 	return (
 		<>
@@ -105,7 +114,7 @@ const WebSocketTest = () => {
 
 				<Text>Messages:</Text>
 
-				<Messages WS_URL={WS_URL} />
+				<Messages lastJsonMessage={lastJsonMessage} />
 				<Input
 					id="chat-message-field"
 					onChange={handleChatMessageChange}
