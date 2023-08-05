@@ -17,6 +17,10 @@ const WebSocketTest = () => {
 			setConnectionState(true);
 			console.log("WebSocket connection established");
 		},
+		onClose: () => {
+			setConnectionState(false);
+			console.log("WebSocket connection closed");
+		},
 		share: true,
 		retryOnError: true,
 		shouldReconnect: () => true,
@@ -39,6 +43,7 @@ const WebSocketTest = () => {
 				setUserId(userId);
 				sendJsonMessage({
 					first_name: firstName,
+					userId: userId,
 					content: `${firstName} has joined the chat`,
 					type: "userevent",
 				});
@@ -81,6 +86,7 @@ const WebSocketTest = () => {
 
 			sendJsonMessage({
 				first_name: firstName,
+				userId: userId,
 				content,
 				type: "chatevent",
 			});
@@ -90,17 +96,6 @@ const WebSocketTest = () => {
 			setChatMessage("");
 		}
 	}
-
-	// const handleLastJsonMessage = (message) => {
-	// 	if (message) {
-	// 		console.log("weiner: " + JSON.stringify(message));
-	// 	}
-	// };
-
-	// useEffect(() => {
-	// 	handleLastJsonMessage(lastJsonMessage);
-	// }, [lastJsonMessage]);
-
 	return (
 		<>
 			<Box width="70vw" height="100vh" padding="20px">
