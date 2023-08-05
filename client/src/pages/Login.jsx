@@ -87,7 +87,16 @@ function Login() {
 			>
 				<Header />
 				<Heading my={5}>Login</Heading>
-				<FormControl bgColor="white" w="50%" p={5} m={5} borderRadius={5}>
+				<FormControl
+					bgColor="white"
+					w="50%"
+					p={5}
+					m={5}
+					borderRadius={5}
+					onKeyUp={(event) => {
+						if (event.key === "Enter") logIn();
+					}}
+				>
 					<FormLabel>Email</FormLabel>
 					<Input
 						type="email"
