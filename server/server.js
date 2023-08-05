@@ -47,13 +47,14 @@ function handleMessage(message, userId) {
 			users[userId] = dataFromClient;
 			const { first_name } = dataFromClient;
 			const content = `${first_name} joined the chat`;
-			chatMessages.push({ timestamp, content });
+			chatMessages.push({ timestamp, content, userId });
 		}
 	} else if (dataFromClient.type === "chatevent") {
 		const { first_name, content } = dataFromClient;
-		chatMessages.push({ timestamp, content: `${first_name}: ${content}` });
+		const userContent = `${first_name}: ${content}`;
+		chatMessages.push({ timestamp, content: userContent, userId });
 	}
-	const json = { type: dataFromClient.type, data: { users, chatMessages } };
+	const json = { chatMessages };
 
 	broadcastMessage(json);
 }

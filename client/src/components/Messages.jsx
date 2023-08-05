@@ -2,13 +2,10 @@ import useWebSocket from "react-use-websocket";
 import { Box } from "@chakra-ui/react";
 
 const Messages = ({ lastJsonMessage }) => {
-	console.log("raw: ", lastJsonMessage);
-	console.log("data: ", lastJsonMessage?.data);
-	const messages = lastJsonMessage?.data?.chatMessages || [];
+	const messages = lastJsonMessage?.chatMessages || [];
 	if (lastJsonMessage === null) {
 		return <div>Loading...</div>;
 	}
-	console.log(messages);
 
 	return (
 		<>

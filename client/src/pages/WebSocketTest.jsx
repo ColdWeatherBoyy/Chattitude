@@ -62,7 +62,6 @@ const WebSocketTest = () => {
 			});
 			if (!newMessage.ok) throw new Error("Error saving message");
 			const newMessageObj = await newMessage.json();
-			console.log(newMessageObj);
 		} catch (err) {
 			console.error(err);
 		}
