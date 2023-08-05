@@ -6,9 +6,10 @@ const Messages = ({ WS_URL }) => {
 		share: true,
 	});
 
-	const messages = lastJsonMessage?.data.chatMessages || [];
-
-	const time = new Date().toLocaleTimeString();
+	const messages = lastJsonMessage?.data?.chatMessages || [];
+	if (lastJsonMessage === null) {
+		return <div>Loading...</div>;
+	}
 
 	return (
 		<>

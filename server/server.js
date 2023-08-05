@@ -5,7 +5,7 @@
 // COMBINED SETUP
 const path = require("path");
 const express = require("express");
-const { createServer, get } = require("http");
+const { createServer } = require("http");
 require("dotenv").config();
 
 const { WebSocket, WebSocketServer } = require("ws");
@@ -26,7 +26,7 @@ const chatMessages = [];
 // event type definitions
 
 // HELPERS
-// broadcast
+// broadcast message
 function broadcastMessage(json) {
 	const data = JSON.stringify(json);
 	for (const userId in clients) {
@@ -37,8 +37,7 @@ function broadcastMessage(json) {
 	}
 }
 
-// message
-
+// handle message
 function handleMessage(message, userId) {
 	const dataFromClient = JSON.parse(message.toString());
 	const json = { type: dataFromClient.type };
@@ -49,13 +48,13 @@ function handleMessage(message, userId) {
 		if (!users[userId]) {
 			users[userId] = dataFromClient;
 			const { first_name } = dataFromClient;
-			chatMessages.push({ timestamp, content: `${first_name} joined the chat` });
+			const content = `${first_name} joined the chat`;
+			chatMessages.push({ timestamp, content });
 		}
 		json.data = { users, chatMessages };
 	} else if (dataFromClient.type === "chatevent") {
 		const { first_name, content } = dataFromClient;
 		chatMessages.push({ timestamp, content: `${first_name}: ${content}` });
-		json.data = { chatMessages };
 	}
 
 	broadcastMessage(json);
@@ -72,9 +71,10 @@ function handleDisconnect(userId) {
 	const timestamp = getTimestamp();
 
 	const { first_name } = user;
+	const content = `${first_name} left the chat`;
 	const json = { type: "userevent" };
 	console.log(first_name, " disconnected");
-	chatMessages.push({ timestamp, content: `${first_name} left the chat` });
+	chatMessages.push({ timestamp, content });
 	json.data = { users, chatMessages };
 	delete clients[userId];
 	delete users[userId];
