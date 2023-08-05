@@ -1,90 +1,36 @@
-// **************************************
-// BEGIN WEBSOCKET CODE
-// **************************************
-
-// COMBINED SETUP
+// Set up server and websocket connection
 const path = require("path");
 const express = require("express");
 const { createServer } = require("http");
 require("dotenv").config();
+const uuidv4 = require("uuid").v4;
+const { handleMessage, handleDisconnect } = require("./utils/serverHelper");
+const db = require("./db/connection");
+const routes = require("./routes");
 
-const { WebSocket, WebSocketServer } = require("ws");
+// Express setup
 const app = express();
 const server = createServer(app);
-const uuidv4 = require("uuid").v4;
-const wsServer = new WebSocketServer({ server });
 const PORT = process.env.PORT || 3001;
 
-// object tracks client connections
+// Websocket setup
+const { WebSocketServer } = require("ws");
+const wsServer = new WebSocketServer({ server });
+
+// Object to track client connections
 const clients = {};
-// object tracks users
-const users = {};
-// user activity history
-const chatMessages = [];
-// event type definitions
-
-// HELPERS
-// broadcast
-function broadcastMessage(json) {
-	const data = JSON.stringify(json);
-	for (const userId in clients) {
-		const client = clients[userId];
-		if (client.readyState === WebSocket.OPEN) {
-			client.send(data);
-		}
-	}
-}
-
-// message
-function handleMessage(message, userId) {
-	const dataFromClient = JSON.parse(message.toString());
-	const json = { type: dataFromClient.type };
-
-	if (dataFromClient.type === "userevent") {
-		users[userId] = dataFromClient;
-		chatMessages.push(`${dataFromClient.first_name} joined the chat`);
-		json.data = { users, chatMessages };
-	} else if (dataFromClient.type === "chatevent") {
-		chatMessages.push(`${dataFromClient.first_name}: ${dataFromClient.content}`);
-		editorContent = dataFromClient.content;
-		json.data = { editorContent, chatMessages };
-	}
-
-	broadcastMessage(json);
-}
-
-// websocket disconnect
-function handleDisconnect(userId) {
-	console.log(`${userId} disconnected`);
-	const json = { type: "userevent" };
-	const username = users[userId]?.first_name || userId;
-	chatMessages.push(`${username} left the chat`);
-	json.data = { users, chatMessages };
-	delete clients[userId];
-	delete users[userId];
-	broadcastMessage(json);
-}
 
 // websocket connection setup
 wsServer.on("connection", function (connection) {
-	// Generate a unique code for every user
-	const userId = uuidv4();
+	// Generate a unique id for every connection
+	const connectionId = uuidv4();
 	console.log("Received a new connection");
-
 	// Store the new connection and handle messages
-	clients[userId] = connection;
-	console.log(`${userId} connected.`);
-	connection.on("message", (message) => handleMessage(message, userId));
+	clients[connectionId] = connection;
+	connection.on("message", (message) => handleMessage(message, connectionId, clients));
 	// User disconnected
-	connection.on("close", () => handleDisconnect(userId));
+	connection.on("close", () => handleDisconnect(connectionId, clients));
 });
-
-// **************************************
-// END WEBSOCKET CODE
-// **************************************
-
-const db = require("./db/connection");
-const routes = require("./routes");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

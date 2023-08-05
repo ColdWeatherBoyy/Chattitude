@@ -6,18 +6,24 @@ const expiration = "48h";
 
 module.exports = {
 	signToken: function ({ _id, first_name }) {
-		console.log(_id, first_name);
 		return jwt.sign({ id: _id, first_name }, secret, {
 			expiresIn: expiration,
 		});
 	},
 	auth: function (req, res, next) {
-		const token = req.headers.cookie.split("=")[1] || "";
-		if (!token) {
+		const tokenCookie = req.headers.cookie
+			? req.headers.cookie
+					.split(";")
+					.find((cookie) => cookie.trim().startsWith("chattitude-token="))
+			: null;
+		if (!tokenCookie) {
 			return res.status(401).json({ message: "No token, authorization denied" });
 		}
 		try {
-			const verified = jwt.verify(token, secret, { maxAge: expiration });
+			const token = tokenCookie.split("=")[1];
+			const verified = jwt.verify(token, secret, {
+				maxAge: expiration,
+			});
 			req.user = verified;
 			next();
 		} catch (err) {

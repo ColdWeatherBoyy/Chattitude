@@ -136,7 +136,16 @@ function SignUp() {
 			>
 				<Header />
 				<Heading my={5}>Sign Up</Heading>
-				<FormControl bgColor="white" w="50%" p={5} m={5} borderRadius={5}>
+				<FormControl
+					bgColor="white"
+					w="50%"
+					p={5}
+					m={5}
+					borderRadius={5}
+					onKeyUp={(event) => {
+						if (event.key === "Enter") signUp();
+					}}
+				>
 					<FormLabel>First Name</FormLabel>
 					<Input
 						placeholder="First Name"

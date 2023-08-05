@@ -8,8 +8,23 @@ const WS_URL = "ws://127.0.0.1:3001";
 
 const WebSocketTest = () => {
 	const [firstName, setFirstName] = useState("");
+	const [userId, setUserId] = useState("");
 	const [connectionState, setConnectionState] = useState(false);
 	const [chatMessage, setChatMessage] = useState("");
+
+	const { sendJsonMessage, readyState, lastJsonMessage } = useWebSocket(WS_URL, {
+		onOpen: () => {
+			setConnectionState(true);
+			console.log("WebSocket connection established");
+		},
+		onClose: () => {
+			setConnectionState(false);
+			console.log("WebSocket connection closed");
+		},
+		share: true,
+		retryOnError: true,
+		shouldReconnect: () => true,
+	});
 
 	useEffect(() => {
 		const validateToken = async () => {
@@ -22,9 +37,14 @@ const WebSocketTest = () => {
 				});
 				if (!response.ok) throw new Error("Invalid token");
 				const data = await response.json();
-				setFirstName(data.user.first_name);
+				const firstName = data.user.first_name;
+				const userId = data.user._id;
+				setFirstName(firstName);
+				setUserId(userId);
 				sendJsonMessage({
-					first_name: data.user.first_name,
+					first_name: firstName,
+					userId: userId,
+					content: `${firstName} has joined the chat`,
 					type: "userevent",
 				});
 			} catch (error) {
@@ -36,18 +56,21 @@ const WebSocketTest = () => {
 		validateToken();
 	}, []);
 
-	const { sendJsonMessage, readyState, lastMessage, getWebsocket } = useWebSocket(
-		WS_URL,
-		{
-			onOpen: () => {
-				setConnectionState(true);
-				console.log("WebSocket connection established");
-			},
-			share: true,
-			retryOnError: true,
-			shouldReconnect: () => true,
+	async function saveMessageInDb(content, userId) {
+		try {
+			const newMessage = await fetch("/api/message/create", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ content, userId }),
+			});
+			if (!newMessage.ok) throw new Error("Error saving message");
+			const newMessageObj = await newMessage.json();
+		} catch (err) {
+			console.error(err);
 		}
-	);
+	}
 
 	function handleChatMessageChange() {
 		setChatMessage(document.getElementById("chat-message-field").value);
@@ -59,29 +82,24 @@ const WebSocketTest = () => {
 		} else if (!chatMessage) {
 			console.log("No message to send");
 		} else {
+			const content = chatMessage;
+
 			sendJsonMessage({
 				first_name: firstName,
-				content: chatMessage,
+				userId: userId,
+				content,
 				type: "chatevent",
 			});
+
+			saveMessageInDb(content, userId);
+
 			setChatMessage("");
 		}
 	}
-
 	return (
 		<>
-			<Box
-				style={{
-					width: "70vw",
-					height: "100vh",
-					padding: "20px",
-				}}
-			>
-				<Box
-					style={{
-						border: "1px solid green",
-					}}
-				>
+			<Box width="70vw" height="100vh" padding="20px">
+				<Box border="1px solid green">
 					<Text>
 						Connection Status: {connectionState ? "connected" : "not connected"}
 					</Text>
@@ -89,7 +107,8 @@ const WebSocketTest = () => {
 				</Box>
 
 				<Text>Messages:</Text>
-				<Messages WS_URL={WS_URL} />
+
+				<Messages lastJsonMessage={lastJsonMessage} />
 				<Input
 					id="chat-message-field"
 					onChange={handleChatMessageChange}
