@@ -56,22 +56,6 @@ const WebSocketTest = () => {
 		validateToken();
 	}, []);
 
-	async function saveMessageInDb(content, userId) {
-		try {
-			const newMessage = await fetch("/api/message/create", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ content, userId }),
-			});
-			if (!newMessage.ok) throw new Error("Error saving message");
-			const newMessageObj = await newMessage.json();
-		} catch (err) {
-			console.error(err);
-		}
-	}
-
 	function handleChatMessageChange() {
 		setChatMessage(document.getElementById("chat-message-field").value);
 	}
@@ -90,8 +74,6 @@ const WebSocketTest = () => {
 				content,
 				type: "chatevent",
 			});
-
-			saveMessageInDb(content, userId);
 
 			setChatMessage("");
 		}

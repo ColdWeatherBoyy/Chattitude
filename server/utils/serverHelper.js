@@ -9,7 +9,7 @@ const connections = {};
 const chatMessages = [];
 
 // handle message
-function handleMessage(message, connectionId, clients) {
+async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 	const dataFromClient = JSON.parse(message.toString());
 	const timestamp = getTimestamp();
 
@@ -20,11 +20,13 @@ function handleMessage(message, connectionId, clients) {
 			connections[connectionId] = userId;
 			const content = `${first_name} joined the chat`;
 			chatMessages.push({ timestamp, content, connectionId });
+			saveMessageInDb(content, userId, HOSTPATHFORAPI);
 		}
 	} else if (dataFromClient.type === "chatevent") {
-		const { first_name, content } = dataFromClient;
+		const { first_name, content, userId } = dataFromClient;
 		const userContent = `${first_name}: ${content}`;
 		chatMessages.push({ timestamp, content: userContent, connectionId });
+		saveMessageInDb(userContent, userId, HOSTPATHFORAPI);
 	}
 	const json = { chatMessages };
 
@@ -44,8 +46,12 @@ function broadcastMessage(json, clients) {
 	}
 }
 
-function handleDisconnect(connectionId, clients) {
+function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 	const userId = connections[connectionId];
+	if (!userId) {
+		return;
+	}
+
 	const userFirstName = users[userId].first_name;
 	if (!userFirstName) {
 		return;
@@ -57,10 +63,30 @@ function handleDisconnect(connectionId, clients) {
 	const json = { type: "userevent" };
 	console.log(userFirstName, " disconnected");
 	chatMessages.push({ timestamp, content });
+	saveMessageInDb(content, userId, HOSTPATHFORAPI);
 	json.data = { users, chatMessages };
 	delete clients[connectionId];
 	delete users[userId];
 	broadcastMessage(json);
+}
+
+async function saveMessageInDb(content, userId, HOSTPATHFORAPI) {
+	// generate the right path to the api endpoint
+	const url = `${HOSTPATHFORAPI}/api/message/create`;
+	try {
+		const newMessage = await fetch(url, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ content, userId }),
+		});
+		if (!newMessage.ok) throw new Error("Error saving message");
+		const newMessageObj = await newMessage.json();
+		console.log("newMessages: ", newMessageObj);
+	} catch (err) {
+		console.error(err);
+	}
 }
 
 module.exports = { broadcastMessage, handleMessage, handleDisconnect };

@@ -12,6 +12,7 @@ const routes = require("./routes");
 const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT || 3001;
+const HOSTPATHFORAPI = process.env.HOSTPATHFORAPI || "http://localhost:3001";
 
 // Websocket setup
 const { WebSocketServer } = require("ws");
@@ -27,9 +28,11 @@ wsServer.on("connection", function (connection) {
 	console.log("Received a new connection");
 	// Store the new connection and handle messages
 	clients[connectionId] = connection;
-	connection.on("message", (message) => handleMessage(message, connectionId, clients));
+	connection.on("message", (message) =>
+		handleMessage(message, connectionId, clients, HOSTPATHFORAPI)
+	);
 	// User disconnected
-	connection.on("close", () => handleDisconnect(connectionId, clients));
+	connection.on("close", () => handleDisconnect(connectionId, clients, HOSTPATHFORAPI));
 });
 
 app.use(express.json());
