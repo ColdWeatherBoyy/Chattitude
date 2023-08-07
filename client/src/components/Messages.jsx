@@ -1,30 +1,42 @@
 import { Box } from "@chakra-ui/react";
-import { get } from "mongoose";
+import { useState, useEffect } from "react";
 
 const Messages = ({ lastJsonMessage }) => {
+	const [messages, setMessages] = useState([]);
+
 	async function getMessages() {
-		// chat lastJsonMessage – if it's empty, get the last hour of chat from database
-		// let messages = lastJsonMessage?.chatMessages || [];
-		// if (messages.length === 0) {
-		// get the last hour of chat from database
-		const lastHourOfMessages = await fetch("/api/message/get", {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
-		if (!lastHourOfMessages.ok) throw new Error("Error getting last hour of chat");
-		const data = await lastHourOfMessages.json();
-		console.log(data);
-		// } else {
-		// 	return;
-		// }
+		try {
+			// get the last hour of chat from database
+			const lastTwentyMessages = await fetch("/api/message/get/lastTwenty", {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+			if (!lastTwentyMessages.ok) throw new Error("Error getting last hour of chat");
+			const data = await lastTwentyMessages.json();
+			console.log(data);
+			return data;
+		} catch (err) {
+			console.log(err);
+		}
 	}
-	// getMessages();
-	const messages = lastJsonMessage?.chatMessages || [];
-	if (lastJsonMessage === null) {
-		return <div>Loading...</div>;
-	}
+
+	useEffect(() => {
+		async function fetchData() {
+			if (!lastJsonMessage || lastJsonMessage.chatMessages.length === 0) {
+				const data = await getMessages();
+				setMessages(data);
+			} else {
+				setMessages((messages) => [
+					...messages,
+					lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1],
+				]);
+			}
+		}
+
+		fetchData();
+	}, [lastJsonMessage]);
 
 	return (
 		<>

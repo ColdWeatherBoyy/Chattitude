@@ -1,5 +1,6 @@
 const { WebSocket } = require("ws");
 const { getTimestamp } = require("./getTimestamp");
+const { connection } = require("mongoose");
 
 // Object used to track users
 const users = {};
@@ -22,12 +23,15 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 			chatMessages.push({ timestamp, content, connectionId });
 			saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 		}
+		console.log("User joined the chat:", users[dataFromClient.userId]);
 	} else if (dataFromClient.type === "chatevent") {
 		const { first_name, content, userId } = dataFromClient;
 		const userContent = `${first_name}: ${content}`;
 		chatMessages.push({ timestamp, content: userContent, connectionId });
 		saveMessageInDb(userContent, userId, timestamp, HOSTPATHFORAPI);
 	}
+	console.log("Current chatMessages:", chatMessages);
+
 	const json = { chatMessages };
 
 	broadcastMessage(json, clients);
@@ -57,6 +61,9 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 		return;
 	}
 
+	console.log("User disconnected:", userFirstName);
+	console.log("Current chatMessages:", chatMessages);
+
 	const timestamp = getTimestamp();
 
 	const content = `${userFirstName} left the chat`;
@@ -83,7 +90,6 @@ async function saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI) {
 		});
 		if (!newMessage.ok) throw new Error("Error saving message");
 		const newMessageObj = await newMessage.json();
-		console.log(newMessageObj);
 	} catch (err) {
 		console.error(err);
 	}

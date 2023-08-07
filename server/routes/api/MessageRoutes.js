@@ -18,16 +18,16 @@ router.post("/create", async (req, res) => {
 	}
 });
 
-// get last hour of messages
-// /api/message/get/lastHour
-router.get("/get/lastHour", async (req, res) => {
+// get last twenty messages
+// /api/message/get/lastTwenty
+router.get("/get/lastTwenty", async (req, res) => {
 	try {
-		const messageData = await Message.find({
-			time: {
-				$gte: new Date(new Date() - 60 * 60 * 1000),
-			},
-		}).populate("userId");
-		res.status(200).json(messageData);
+		const messageData = await Message.find({})
+			.sort({ time: -1 })
+			.limit(20)
+			.populate("userId");
+		const reversedMessages = messageData.sort((a, b) => a.time - b.time);
+		res.status(200).json(reversedMessages);
 	} catch (err) {
 		res.status(400).json(err);
 	}
