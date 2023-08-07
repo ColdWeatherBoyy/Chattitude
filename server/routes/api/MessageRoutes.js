@@ -5,10 +5,11 @@ const { Message } = require("../../models");
 // create a message
 router.post("/create", async (req, res) => {
 	try {
-		const { content, userId } = req.body;
+		const { content, userId, timestamp } = req.body;
 		const messageData = await Message.create({
 			content,
 			userId,
+			timestamp,
 		});
 
 		res.status(200).json(messageData);
@@ -18,11 +19,11 @@ router.post("/create", async (req, res) => {
 });
 
 // get last hour of messages
-// /api/message/get/lasthour
-router.get("/get/lasthour", async (req, res) => {
+// /api/message/get/lastHour
+router.get("/get/lastHour", async (req, res) => {
 	try {
 		const messageData = await Message.find({
-			timestamp: {
+			time: {
 				$gte: new Date(new Date() - 60 * 60 * 1000),
 			},
 		}).populate("userId");

@@ -20,13 +20,13 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 			connections[connectionId] = userId;
 			const content = `${first_name} joined the chat`;
 			chatMessages.push({ timestamp, content, connectionId });
-			saveMessageInDb(content, userId, HOSTPATHFORAPI);
+			saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 		}
 	} else if (dataFromClient.type === "chatevent") {
 		const { first_name, content, userId } = dataFromClient;
 		const userContent = `${first_name}: ${content}`;
 		chatMessages.push({ timestamp, content: userContent, connectionId });
-		saveMessageInDb(userContent, userId, HOSTPATHFORAPI);
+		saveMessageInDb(userContent, userId, timestamp, HOSTPATHFORAPI);
 	}
 	const json = { chatMessages };
 
@@ -63,14 +63,14 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 	const json = { type: "userevent" };
 	console.log(userFirstName, " disconnected");
 	chatMessages.push({ timestamp, content });
-	saveMessageInDb(content, userId, HOSTPATHFORAPI);
+	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 	json.data = { users, chatMessages };
 	delete clients[connectionId];
 	delete users[userId];
 	broadcastMessage(json);
 }
 
-async function saveMessageInDb(content, userId, HOSTPATHFORAPI) {
+async function saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI) {
 	// generate the right path to the api endpoint
 	const url = `${HOSTPATHFORAPI}/api/message/create`;
 	try {
@@ -79,11 +79,11 @@ async function saveMessageInDb(content, userId, HOSTPATHFORAPI) {
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ content, userId }),
+			body: JSON.stringify({ content, userId, timestamp }),
 		});
 		if (!newMessage.ok) throw new Error("Error saving message");
 		const newMessageObj = await newMessage.json();
-		console.log("newMessages: ", newMessageObj);
+		console.log(newMessageObj);
 	} catch (err) {
 		console.error(err);
 	}
