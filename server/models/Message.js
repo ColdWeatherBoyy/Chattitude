@@ -14,6 +14,10 @@ const messageSchema = new Schema({
 		type: Date,
 		default: Date.now,
 	},
+	timestamp: {
+		type: String,
+		required: true,
+	},
 });
 
 const Message = model("Message", messageSchema);
