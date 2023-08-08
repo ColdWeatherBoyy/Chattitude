@@ -42,6 +42,7 @@ function SignUp() {
 					password: passwordInput,
 				}),
 			});
+			console.log(response);
 			if (response.ok) {
 				window.location.href = "/websockettest";
 			} else {
