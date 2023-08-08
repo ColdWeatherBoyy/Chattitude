@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import useWebSocket from "react-use-websocket";
 
-import { Box, Input, Button, Text } from "@chakra-ui/react";
+import { Box, Input, Button, Text, Heading } from "@chakra-ui/react";
 import Messages from "../components/Messages";
+import Header from "../components/Header";
 
 const WS_URL = "ws://127.0.0.1:3001";
 
@@ -80,28 +81,56 @@ const WebSocketTest = () => {
 	}
 	return (
 		<>
-			<Box width="70vw" height="100vh" padding="20px">
-				<Box border="1px solid green">
-					<Text>
-						Connection Status: {connectionState ? "connected" : "not connected"}
-					</Text>
-					<Text></Text>
+			<Box
+				w="100vw"
+				h="100vh"
+				bgColor="gray.200"
+				display="flex"
+				flexDirection="column"
+				alignItems="center"
+			>
+				<Header />
+				<Heading my={5}>Messages:</Heading>
+				<Box 
+					bgColor="white"
+					w="50%"
+					h="100%"
+					p={5}
+					m={5}
+					borderRadius={5}
+					display="flex"
+					flexDirection="column"
+					justifyContent="space-between"
+				>
+					<Box>
+						<Text
+							fontWeight="bold"
+						>
+							Connection Status: {connectionState ? "Connected" : "Not Connected"}
+						</Text>
+						<Text></Text>
+					</Box>
+
+					
+
+					<Messages lastJsonMessage={lastJsonMessage} />
+					<Box
+						display="flex"
+						flexDirection="row"
+					>
+						<Input
+							id="chat-message-field"
+							onChange={handleChatMessageChange}
+							value={chatMessage}
+							onKeyUp={(event) => {
+								if (event.key === "Enter") handleSendMessage();
+							}}
+						/>
+						<Button id="chat-send-button" onClick={handleSendMessage} ml={4}>
+							Send
+						</Button>
+					</Box>
 				</Box>
-
-				<Text>Messages:</Text>
-
-				<Messages lastJsonMessage={lastJsonMessage} />
-				<Input
-					id="chat-message-field"
-					onChange={handleChatMessageChange}
-					value={chatMessage}
-					onKeyUp={(event) => {
-						if (event.key === "Enter") handleSendMessage();
-					}}
-				/>
-				<Button id="chat-send-button" onClick={handleSendMessage}>
-					Send
-				</Button>
 			</Box>
 		</>
 	);

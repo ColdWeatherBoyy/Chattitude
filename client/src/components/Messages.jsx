@@ -84,9 +84,8 @@ const Messages = ({ lastJsonMessage }) => {
 	return (
 		<>
 			<Box
-				border="1px solid green"
 				minHeight="2rem"
-				h="75vh"
+				h="50vh"
 				overflowY="scroll"
 				ref={scrollableRef}
 				display="flex"
