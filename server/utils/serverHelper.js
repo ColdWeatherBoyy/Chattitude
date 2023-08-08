@@ -23,14 +23,12 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 			chatMessages.push({ timestamp, content, connectionId });
 			saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 		}
-		console.log("User joined the chat:", users[dataFromClient.userId]);
 	} else if (dataFromClient.type === "chatevent") {
 		const { first_name, content, userId } = dataFromClient;
 		const userContent = `${first_name}: ${content}`;
 		chatMessages.push({ timestamp, content: userContent, connectionId });
 		saveMessageInDb(userContent, userId, timestamp, HOSTPATHFORAPI);
 	}
-	console.log("Current chatMessages:", chatMessages);
 
 	const json = { chatMessages };
 
@@ -60,9 +58,6 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 	if (!userFirstName) {
 		return;
 	}
-
-	console.log("User disconnected:", userFirstName);
-	console.log("Current chatMessages:", chatMessages);
 
 	const timestamp = getTimestamp();
 
