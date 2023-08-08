@@ -2,11 +2,11 @@ const { WebSocket } = require("ws");
 const { getTimestamp } = require("./getTimestamp");
 const { connection } = require("mongoose");
 
-// Object used to track users
-const users = {};
-// Object used to relate connections to userId
-const connections = {};
-// Array to track chat history
+// Map used to track users
+const users = new Map();
+// Map used to relate connections to userId
+const connections = new Map();
+// Set to track chat history
 const chatMessages = [];
 
 // handle message
@@ -15,11 +15,13 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 	const timestamp = getTimestamp();
 
 	if (dataFromClient.type === "userevent") {
-		if (!users[dataFromClient.userId]) {
-			const { first_name, userId } = dataFromClient;
-			users[userId] = { first_name };
-			connections[connectionId] = userId;
+		const { first_name, userId } = dataFromClient;
+		if (!users.has(userId)) {
+			users.set(userId, { first_name });
+			connections.set(connectionId, userId);
+
 			const content = `${first_name} joined the chat`;
+			console.log(content);
 			chatMessages.push({ timestamp, content, connectionId });
 			saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 		}
@@ -49,12 +51,12 @@ function broadcastMessage(json, clients) {
 }
 
 function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
-	const userId = connections[connectionId];
+	const userId = connections.get(connectionId);
 	if (!userId) {
 		return;
 	}
 
-	const userFirstName = users[userId].first_name;
+	const userFirstName = users.get(userId).first_name;
 	if (!userFirstName) {
 		return;
 	}
@@ -67,8 +69,8 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 	chatMessages.push({ timestamp, content });
 	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 	json.data = { users, chatMessages };
-	delete clients[connectionId];
-	delete users[userId];
+	connections.delete(connectionId);
+	users.delete(userId);
 	broadcastMessage(json);
 }
 

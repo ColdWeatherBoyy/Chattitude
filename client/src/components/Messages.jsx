@@ -6,9 +6,12 @@ const Messages = ({ lastJsonMessage }) => {
 	const [loadMoreState, setLoadMoreState] = useState(false);
 	const scrollableRef = useRef();
 
+	// functions to get Messages from the database
+
+	// get the most recent twenty messages from the database
 	async function getMessages() {
 		try {
-			// get the last hour of chat from database
+			// get the last twent messages from the database
 			const mostRecentTwentyMessages = await fetch("/api/message/get/mostRecentTwenty", {
 				method: "GET",
 				headers: {
@@ -18,48 +21,57 @@ const Messages = ({ lastJsonMessage }) => {
 			if (!mostRecentTwentyMessages.ok)
 				throw new Error("Error getting last hour of chat");
 			const data = await mostRecentTwentyMessages.json();
-			console.log(data);
 			return data;
 		} catch (err) {
 			console.log(err);
 		}
 	}
 
-	useEffect(() => {
-		async function fetchData() {
-			if (!lastJsonMessage || lastJsonMessage.chatMessages.length === 0) {
-				const data = await getMessages();
-				setMessages(data);
-			} else {
-				setMessages((messages) => [
-					...messages,
-					lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1],
-				]);
-			}
-		}
-
-		fetchData();
-	}, [lastJsonMessage]);
-
-	const getMoreMessages = async () => {
+	// get the next twenty messages from the database
+	async function getMoreMessages() {
 		try {
+			// set load more state for scrolling
 			setLoadMoreState(true);
+			// get the message Id for the last message in the chat box
 			const lastMessageId = messages[0]._id;
-			const data = await fetch(`/api/message/get/nextTwentyMessages/${lastMessageId}`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			if (!data.ok) throw new Error("Error getting next twenty messages");
-			const json = await data.json();
-			console.log(json);
-			setMessages((messages) => [...json, ...messages]);
+			// get the next twenty messages from the database, given the last message
+			const nextTwentyMessages = await fetch(
+				`/api/message/get/nextTwentyMessages/${lastMessageId}`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+					},
+				}
+			);
+			if (!nextTwentyMessages.ok) throw new Error("Error getting next twenty messages");
+			const data = await nextTwentyMessages.json();
+			// update state with the new messages
+			setMessages((messages) => [...data, ...messages]);
 		} catch (err) {
 			console.log(err);
 		}
-	};
+	}
 
+	// determine where to get message data from
+	async function fetchData() {
+		if (!lastJsonMessage || lastJsonMessage.chatMessages.length === 0) {
+			const data = await getMessages();
+			setMessages(data);
+		} else {
+			setMessages((messages) => [
+				...messages,
+				lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1],
+			]);
+		}
+	}
+
+	// get messages on mount and when a new message is sent
+	useEffect(() => {
+		fetchData();
+	}, [lastJsonMessage]);
+
+	// scroll to the bottom of the chat box on mount and when a new message is sent, if the user has not clicked load more
 	useEffect(() => {
 		// Scroll to the bottom of the chat box
 		if (loadMoreState) {

@@ -28,6 +28,7 @@ wsServer.on("connection", function (connection) {
 	console.log("Received a new connection");
 	// Store the new connection and handle messages
 	clients[connectionId] = connection;
+	// User sent a message, either userevent or a chatevent
 	connection.on("message", (message) =>
 		handleMessage(message, connectionId, clients, HOSTPATHFORAPI)
 	);
