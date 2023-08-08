@@ -70,11 +70,12 @@ router.get("/validate/", auth, async (req, res) => {
 // User create route
 // /api/user/post/create
 router.post("/post/create", async (req, res) => {
+	console.log(req.body);
 	try {
 		const { first_name, last_name, email, password } = req.body;
 
 		const user = await User.create({ first_name, last_name, email, password });
-
+		console.log(user);
 		// add JWT here
 		const token = signToken(user);
 
