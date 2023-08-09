@@ -127,7 +127,7 @@ const GlobalChat = () => {
 					</Text>
 				</Box>
 
-				<Messages lastJsonMessage={lastJsonMessage} />
+				<Messages lastJsonMessage={lastJsonMessage} firstName={firstName} />
 				<Box display="flex" flexDirection="row" boxShadow="lg" borderRadius={8}>
 					<Input
 						id="chat-message-field"

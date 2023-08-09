@@ -1,7 +1,7 @@
 import { Box, Text, Flex } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
 
-const Messages = ({ lastJsonMessage }) => {
+const Messages = ({ lastJsonMessage, firstName }) => {
 	const [messages, setMessages] = useState([]);
 	const [loadMoreState, setLoadMoreState] = useState(false);
 	const scrollableRef = useRef();
@@ -90,17 +90,24 @@ const Messages = ({ lastJsonMessage }) => {
 				ref={scrollableRef}
 				display="flex"
 				flexDirection="column"
-				p={2}
+				p={4}
+				border="2px solid"
+				borderColor="gray.300"
 				boxShadow="inner"
-				border="1px solid gray.300"
+				borderRadius={8}
+				bg="gray.200"
+				css={{
+					scrollbarGutter: "none",
+				}}
 			>
 				<Text
 					alignSelf="center"
 					fontSize={14}
 					as="a"
 					cursor="pointer"
-					color="gray.500"
+					color="gray.600"
 					onClick={getMoreMessages}
+					mb={2}
 				>
 					Load More...
 				</Text>
@@ -109,47 +116,63 @@ const Messages = ({ lastJsonMessage }) => {
 						const { timestamp, content } = message;
 						let type;
 						let messageContent;
-						let firstName;
+						let userName;
 						// break content apart by : to style separately
 						if (content.includes(":")) {
-							[firstName, messageContent] = content.split(":");
+							[userName, messageContent] = content.split(":");
 							type = "chatevent";
 						} else {
 							type = "userevent";
 							messageContent = content;
 						}
 						return (
-							<>
-								<Flex
-									key={`message${index}`}
-									mb={1}
-									// w={type === "chatevent" ? "100%" : "25%"}
-									w="100%"
-									direction="column"
-									bg="gray.50"
-									border="1px solid"
-									borderColor="gray.100"
-									color="black"
-									borderRadius={8}
-									px={3}
-									py={1}
-									boxShadow="sm"
-									fontSize={type === "chatevent" ? "md" : "2xs"}
-								>
-									{type === "chatevent" ? (
-										<Flex w="100%" justifyContent="space-between" alignItems="center">
-											<Text>
-												{firstName}: {messageContent}
+							<Flex
+								key={`message${index}`}
+								mb={1}
+								w={type === "chatevent" ? "100%" : "fit-content"}
+								alignSelf={type === "chatevent" ? "flex-start" : "center"}
+								direction="column"
+								bg="gray.50"
+								border="1px solid"
+								borderColor="gray.100"
+								color="black"
+								borderRadius={8}
+								px={3}
+								py={1}
+								boxShadow="sm"
+							>
+								{type === "chatevent" ? (
+									<Flex w="100%" justifyContent="space-between" alignItems="center">
+										<Flex alignItems="center">
+											<Text
+												mr={4}
+												color={userName === firstName ? "brand.300" : "red.400"}
+												fontWeight="bold"
+												fontSize="sm"
+											>
+												{userName}:
 											</Text>
-											<Text fontSize="2xs">{timestamp}</Text>
+											<Text fontSize="md" pr={8}>
+												{messageContent}
+											</Text>
 										</Flex>
-									) : (
-										<Flex flexDirection="column" alignItems="center">
-											<Text>{messageContent}</Text>
-										</Flex>
-									)}
-								</Flex>
-							</>
+										<Text fontSize="2xs" color="gray.600">
+											{timestamp}
+										</Text>
+									</Flex>
+								) : (
+									<Flex
+										color="gray.600"
+										flexDirection="column"
+										alignItems="center"
+										fontSize="2xs"
+									>
+										<Text>
+											{messageContent} - {timestamp}
+										</Text>
+									</Flex>
+								)}
+							</Flex>
 						);
 					})}
 			</Box>
