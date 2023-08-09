@@ -138,13 +138,13 @@ const GlobalChat = () => {
 						borderTopRightRadius={0}
 						borderBottomRightRadius={0}
 						borderRight={0}
-						bgColor="gray.200"
+						bgColor="gray.100"
 						focusBorderColor="gray.200"
 						boxShadow="inner"
 						borderColor={isButtonHovered ? "gray.100" : "gray.200"}
 						_focus={{
 							boxShadow: "none",
-							bgColor: "gray.200",
+							bgColor: "gray.100",
 							borderColor: isButtonHovered ? "gray.100" : "gray.200",
 						}}
 						_hover={{
@@ -156,14 +156,14 @@ const GlobalChat = () => {
 						onClick={handleSendMessage}
 						borderTopLeftRadius={0}
 						borderBottomLeftRadius={0}
-						borderColor={isButtonHovered ? "gray.100" : "gray.200"}
+						borderColor="gray.200"
 						borderLeft="0"
-						bgColor="gray.100"
-						boxShadow="inner"
-						_hover={{ borderColor: "gray.100", boxShadow: "2xl" }}
+						bgColor="gray.50"
+						boxShadow={isButtonHovered ? "2xl" : "inner"}
+						_hover={{ borderColor: "gray.100" }}
 						_active={{
-							borderColor: "gray.100",
-							bgColor: "gray.200",
+							borderColor: "transparent",
+							bgColor: "gray.100",
 							boxShadow: "inner",
 							outline: "none",
 						}}
