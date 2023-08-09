@@ -30,7 +30,7 @@ function Login() {
 				}),
 			});
 			if (response.ok) {
-				window.location.href = "/websockettest";
+				window.location.href = "/globalchat";
 			} else {
 				const errorData = await response.json();
 				alert(errorData.error);

@@ -1,7 +1,8 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Text, Flex } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
+import Loader from "./Loader";
 
-const Messages = ({ lastJsonMessage }) => {
+const Messages = ({ lastJsonMessage, firstName }) => {
 	const [messages, setMessages] = useState([]);
 	const [loadMoreState, setLoadMoreState] = useState(false);
 	const scrollableRef = useRef();
@@ -30,8 +31,6 @@ const Messages = ({ lastJsonMessage }) => {
 	// get the next twenty messages from the database
 	async function getMoreMessages() {
 		try {
-			// set load more state for scrolling
-			setLoadMoreState(true);
 			// get the message Id for the last message in the chat box
 			const lastMessageId = messages[0]._id;
 			// get the next twenty messages from the database, given the last message
@@ -52,6 +51,15 @@ const Messages = ({ lastJsonMessage }) => {
 			console.log(err);
 		}
 	}
+
+	const handleGetMoreMessages = () => {
+		// set load more state for scrolling
+		setLoadMoreState(true);
+		// delay the call
+		setTimeout(() => {
+			getMoreMessages();
+		}, 500);
+	};
 
 	// determine where to get message data from
 	async function fetchData() {
@@ -90,26 +98,102 @@ const Messages = ({ lastJsonMessage }) => {
 				ref={scrollableRef}
 				display="flex"
 				flexDirection="column"
+				p={4}
+				border="2px solid"
+				borderColor="gray.300"
+				boxShadow="inner"
+				borderRadius={8}
+				bg="gray.200"
+				css={{
+					scrollbarGutter: "none",
+				}}
 			>
-				<Text
-					alignSelf="center"
-					fontSize={12}
-					as="a"
-					cursor="pointer"
-					onClick={getMoreMessages}
-				>
-					Load More...
-				</Text>
+				{loadMoreState ? (
+					<Flex
+						alignItems="center"
+						justifyContent="center"
+						h="40px"
+						position="relative"
+						mt={6}
+						mb={8}
+					>
+						<Loader />
+					</Flex>
+				) : (
+					<Text
+						alignSelf="center"
+						fontSize={14}
+						as="a"
+						cursor="pointer"
+						color="gray.600"
+						onClick={handleGetMoreMessages}
+						mb={2}
+					>
+						Load More...
+					</Text>
+				)}
 				{messages &&
 					messages.map((message, index) => {
 						const { timestamp, content } = message;
+						let type;
+						let messageContent;
+						let userName;
+						// break content apart by : to style separately
+						if (content.includes(":")) {
+							[userName, messageContent] = content.split(":");
+							type = "chatevent";
+						} else {
+							type = "userevent";
+							messageContent = content;
+						}
 						return (
-							<Box key={`message${index}`}>
-								{content}
-								<span style={{ fontSize: "0.6rem", color: "grey", float: "right" }}>
-									{timestamp}
-								</span>
-							</Box>
+							<Flex
+								key={`message${index}`}
+								mb={1}
+								w={type === "chatevent" ? "100%" : "fit-content"}
+								alignSelf={type === "chatevent" ? "flex-start" : "center"}
+								direction="column"
+								bg="gray.50"
+								border="1px solid"
+								borderColor="gray.100"
+								color="black"
+								borderRadius={8}
+								px={3}
+								py={1}
+								boxShadow="sm"
+							>
+								{type === "chatevent" ? (
+									<Flex w="100%" justifyContent="space-between" alignItems="center">
+										<Flex alignItems="center">
+											<Text
+												mr={4}
+												color={userName === firstName ? "brand.300" : "red.400"}
+												fontWeight="bold"
+												fontSize="sm"
+											>
+												{userName}:
+											</Text>
+											<Text fontSize="md" pr={8}>
+												{messageContent}
+											</Text>
+										</Flex>
+										<Text fontSize="2xs" color="gray.600">
+											{timestamp}
+										</Text>
+									</Flex>
+								) : (
+									<Flex
+										color="gray.600"
+										flexDirection="column"
+										alignItems="center"
+										fontSize="2xs"
+									>
+										<Text>
+											{messageContent} - {timestamp}
+										</Text>
+									</Flex>
+								)}
+							</Flex>
 						);
 					})}
 			</Box>
