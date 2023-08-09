@@ -1,4 +1,4 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Text, Flex } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
 
 const Messages = ({ lastJsonMessage }) => {
@@ -90,12 +90,16 @@ const Messages = ({ lastJsonMessage }) => {
 				ref={scrollableRef}
 				display="flex"
 				flexDirection="column"
+				p={2}
+				boxShadow="inner"
+				border="1px solid gray.300"
 			>
 				<Text
 					alignSelf="center"
-					fontSize={12}
+					fontSize={14}
 					as="a"
 					cursor="pointer"
+					color="gray.500"
 					onClick={getMoreMessages}
 				>
 					Load More...
@@ -103,13 +107,49 @@ const Messages = ({ lastJsonMessage }) => {
 				{messages &&
 					messages.map((message, index) => {
 						const { timestamp, content } = message;
+						let type;
+						let messageContent;
+						let firstName;
+						// break content apart by : to style separately
+						if (content.includes(":")) {
+							[firstName, messageContent] = content.split(":");
+							type = "chatevent";
+						} else {
+							type = "userevent";
+							messageContent = content;
+						}
 						return (
-							<Box key={`message${index}`}>
-								{content}
-								<span style={{ fontSize: "0.6rem", color: "grey", float: "right" }}>
-									{timestamp}
-								</span>
-							</Box>
+							<>
+								<Flex
+									key={`message${index}`}
+									mb={1}
+									// w={type === "chatevent" ? "100%" : "25%"}
+									w="100%"
+									direction="column"
+									bg="gray.50"
+									border="1px solid"
+									borderColor="gray.100"
+									color="black"
+									borderRadius={8}
+									px={3}
+									py={1}
+									boxShadow="sm"
+									fontSize={type === "chatevent" ? "md" : "2xs"}
+								>
+									{type === "chatevent" ? (
+										<Flex w="100%" justifyContent="space-between" alignItems="center">
+											<Text>
+												{firstName}: {messageContent}
+											</Text>
+											<Text fontSize="2xs">{timestamp}</Text>
+										</Flex>
+									) : (
+										<Flex flexDirection="column" alignItems="center">
+											<Text>{messageContent}</Text>
+										</Flex>
+									)}
+								</Flex>
+							</>
 						);
 					})}
 			</Box>

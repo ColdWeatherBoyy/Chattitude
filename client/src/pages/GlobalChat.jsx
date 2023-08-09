@@ -119,6 +119,7 @@ const GlobalChat = () => {
 				display="flex"
 				flexDirection="column"
 				justifyContent="space-evenly"
+				boxShadow="xl"
 			>
 				<Box width="fit-content" border="1px solid black" px={3} py={2} boxShadow="xl">
 					<Text fontWeight="bold">
