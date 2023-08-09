@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import Login from "./pages/Login.jsx";
-import WebSocketTest from "./pages/WebSocketTest.jsx";
+import GlobalChat from "./pages/GlobalChat.jsx";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme/theme.js";
 import "./index.css";
@@ -24,8 +24,8 @@ const router = createBrowserRouter([
 		element: <SignUp />,
 	},
 	{
-		path: "/websockettest",
-		element: <WebSocketTest />,
+		path: "/GlobalChat",
+		element: <GlobalChat />,
 	},
 	{
 		path: "*",
