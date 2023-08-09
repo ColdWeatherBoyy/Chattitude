@@ -1,5 +1,6 @@
 import { Box, Text, Flex } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
+import Loader from "./Loader";
 
 const Messages = ({ lastJsonMessage, firstName }) => {
 	const [messages, setMessages] = useState([]);
@@ -30,8 +31,6 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 	// get the next twenty messages from the database
 	async function getMoreMessages() {
 		try {
-			// set load more state for scrolling
-			setLoadMoreState(true);
 			// get the message Id for the last message in the chat box
 			const lastMessageId = messages[0]._id;
 			// get the next twenty messages from the database, given the last message
@@ -52,6 +51,15 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 			console.log(err);
 		}
 	}
+
+	const handleGetMoreMessages = () => {
+		// set load more state for scrolling
+		setLoadMoreState(true);
+		// delay the call
+		setTimeout(() => {
+			getMoreMessages();
+		}, 500);
+	};
 
 	// determine where to get message data from
 	async function fetchData() {
@@ -100,17 +108,30 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 					scrollbarGutter: "none",
 				}}
 			>
-				<Text
-					alignSelf="center"
-					fontSize={14}
-					as="a"
-					cursor="pointer"
-					color="gray.600"
-					onClick={getMoreMessages}
-					mb={2}
-				>
-					Load More...
-				</Text>
+				{loadMoreState ? (
+					<Flex
+						alignItems="center"
+						justifyContent="center"
+						h="40px"
+						position="relative"
+						mt={6}
+						mb={8}
+					>
+						<Loader />
+					</Flex>
+				) : (
+					<Text
+						alignSelf="center"
+						fontSize={14}
+						as="a"
+						cursor="pointer"
+						color="gray.600"
+						onClick={handleGetMoreMessages}
+						mb={2}
+					>
+						Load More...
+					</Text>
+				)}
 				{messages &&
 					messages.map((message, index) => {
 						const { timestamp, content } = message;
