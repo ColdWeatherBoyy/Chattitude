@@ -25,6 +25,7 @@ const GlobalChat = () => {
 		onClose: () => {
 			console.log("WebSocket connection closed");
 		},
+		// Will attempt to reconnect on all close events, such as server shutting down
 		share: true,
 		retryOnError: true,
 		shouldReconnect: () => true,
@@ -33,7 +34,11 @@ const GlobalChat = () => {
 	// Helper Functions
 
 	// Event Handlers
-	const handleChatMessageChange = () => {
+	const handleTextareaValueChange = () => {
+		// Update height of textarea
+		chatTextarea.current.style.height = "auto";
+		chatTextarea.current.style.height = `${chatTextarea.current.scrollHeight}px`;
+		// Update chatMessage state
 		setChatMessage(chatTextarea.current.value);
 	};
 
@@ -57,11 +62,7 @@ const GlobalChat = () => {
 		}
 	};
 
-	const updateTextareaHeight = () => {
-		chatTextarea.current.style.height = "auto";
-		chatTextarea.current.style.height = `${chatTextarea.current.scrollHeight}px`;
-	};
-
+	// CSS Event Handlers
 	const handleButtonHover = () => {
 		setIsButtonHovered(true);
 	};
@@ -105,7 +106,7 @@ const GlobalChat = () => {
 				gap={5}
 				p={5}
 				m={5}
-				borderRadius={5}
+				borderRadius={8}
 				flexDirection="column"
 				justifyContent="space-between"
 				boxShadow="xl"
@@ -114,8 +115,7 @@ const GlobalChat = () => {
 				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
 					<Textarea
 						ref={chatTextarea}
-						onChange={handleChatMessageChange}
-						onInput={updateTextareaHeight}
+						onInput={handleTextareaValueChange}
 						value={chatMessage}
 						onKeyDown={(event) => {
 							if (event.key === "Enter" && !event.shiftKey) {
@@ -143,7 +143,6 @@ const GlobalChat = () => {
 					/>
 					<Box
 						as="button"
-						id="chat-send-button"
 						onClick={handleSendMessage}
 						borderTopLeftRadius={0}
 						borderBottomLeftRadius={0}
@@ -161,7 +160,7 @@ const GlobalChat = () => {
 						_focus={{
 							outline: "none",
 						}}
-						role="submit-message"
+						role="submit-message-button"
 						onMouseEnter={handleButtonHover}
 						onMouseLeave={handleButtonLeave}
 						w="15vh"
