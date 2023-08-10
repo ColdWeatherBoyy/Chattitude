@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import useWebSocket from "react-use-websocket";
-import { Box, Textarea, Button, Flex, Heading } from "@chakra-ui/react";
+import { Box, Textarea, Flex, Heading } from "@chakra-ui/react";
 import Messages from "../components/Messages";
 import Header from "../components/Header";
+import validateToken from "../utils/auth";
 
 const WS_URL = "ws://127.0.0.1:3001";
 
@@ -30,34 +31,6 @@ const GlobalChat = () => {
 	});
 
 	// Helper Functions
-
-	// Validate token and set user info
-	const validateToken = async () => {
-		try {
-			const response = await fetch("/api/user/validate", {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			if (!response.ok) throw new Error("Invalid token");
-			const data = await response.json();
-			const firstName = data.user.first_name;
-			const userId = data.user._id;
-			setFirstName(firstName);
-			setUserId(userId);
-			sendJsonMessage({
-				first_name: firstName,
-				userId: userId,
-				content: `${firstName} has joined the chat`,
-				type: "userevent",
-			});
-		} catch (error) {
-			console.error(error);
-			// redirect to login page
-			window.location.href = "/login";
-		}
-	};
 
 	// Event Handlers
 	const handleChatMessageChange = () => {
@@ -100,7 +73,18 @@ const GlobalChat = () => {
 	// useEffect declarations
 	// Validate user token on page load, redirect to login page if invalid
 	useEffect(() => {
-		validateToken();
+		const validateAndExtract = async () => {
+			const { firstName, userId } = await validateToken();
+			setFirstName(firstName);
+			setUserId(userId);
+			sendJsonMessage({
+				first_name: firstName,
+				userId: userId,
+				content: `${firstName} has joined the chat`,
+				type: "userevent",
+			});
+		};
+		validateAndExtract();
 	}, []);
 
 	return (
@@ -133,8 +117,11 @@ const GlobalChat = () => {
 						onChange={handleChatMessageChange}
 						onInput={updateTextareaHeight}
 						value={chatMessage}
-						onKeyUp={(event) => {
-							if (event.key === "Enter") handleSendMessage();
+						onKeyDown={(event) => {
+							if (event.key === "Enter" && !event.shiftKey) {
+								event.preventDefault();
+								handleSendMessage();
+							}
 						}}
 						borderTopRightRadius={0}
 						borderBottomRightRadius={0}
