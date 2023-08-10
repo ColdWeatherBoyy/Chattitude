@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import useWebSocket from "react-use-websocket";
 import { Box, Textarea, Button, Flex, Heading } from "@chakra-ui/react";
 import Messages from "../components/Messages";
@@ -12,6 +12,9 @@ const GlobalChat = () => {
 	const [userId, setUserId] = useState("");
 	const [chatMessage, setChatMessage] = useState("");
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
+
+	// useRef declarations
+	const chatTextarea = useRef(null);
 
 	// WebSocket Hook declarations
 	const { sendJsonMessage, readyState, lastJsonMessage } = useWebSocket(WS_URL, {
@@ -58,7 +61,7 @@ const GlobalChat = () => {
 
 	// Event Handlers
 	const handleChatMessageChange = () => {
-		setChatMessage(document.getElementById("chat-message-field").value);
+		setChatMessage(chatTextarea.current.value);
 	};
 
 	// Send message to server
@@ -79,6 +82,11 @@ const GlobalChat = () => {
 
 			setChatMessage("");
 		}
+	};
+
+	const updateTextareaHeight = () => {
+		chatTextarea.current.style.height = "auto";
+		chatTextarea.current.style.height = `${chatTextarea.current.scrollHeight}px`;
 	};
 
 	const handleButtonHover = () => {
@@ -121,8 +129,9 @@ const GlobalChat = () => {
 				<Messages lastJsonMessage={lastJsonMessage} firstName={firstName} />
 				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
 					<Textarea
-						id="chat-message-field"
+						ref={chatTextarea}
 						onChange={handleChatMessageChange}
+						onInput={updateTextareaHeight}
 						value={chatMessage}
 						onKeyUp={(event) => {
 							if (event.key === "Enter") handleSendMessage();
@@ -130,6 +139,7 @@ const GlobalChat = () => {
 						borderTopRightRadius={0}
 						borderBottomRightRadius={0}
 						borderRight={0}
+						maxH="30vh"
 						bgColor="gray.100"
 						focusBorderColor="gray.200"
 						boxShadow="inner"
