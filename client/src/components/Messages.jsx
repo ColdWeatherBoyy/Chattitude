@@ -93,12 +93,11 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 		<>
 			<Box
 				minHeight="2rem"
-				h="50vh"
 				overflowY="scroll"
 				ref={scrollableRef}
 				display="flex"
 				flexDirection="column"
-				p={4}
+				p={2}
 				border="2px solid"
 				borderColor="gray.300"
 				boxShadow="inner"

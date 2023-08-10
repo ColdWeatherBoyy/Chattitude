@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import useWebSocket from "react-use-websocket";
-import { Box, Input, Button, Text, Heading, border } from "@chakra-ui/react";
+import { Box, Textarea, Button, Flex, Heading } from "@chakra-ui/react";
 import Messages from "../components/Messages";
 import Header from "../components/Header";
 
@@ -10,18 +10,15 @@ const GlobalChat = () => {
 	// State declarations
 	const [firstName, setFirstName] = useState("");
 	const [userId, setUserId] = useState("");
-	const [connectionState, setConnectionState] = useState(false);
 	const [chatMessage, setChatMessage] = useState("");
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
 
 	// WebSocket Hook declarations
 	const { sendJsonMessage, readyState, lastJsonMessage } = useWebSocket(WS_URL, {
 		onOpen: () => {
-			setConnectionState(true);
 			console.log("WebSocket connection established");
 		},
 		onClose: () => {
-			setConnectionState(false);
 			console.log("WebSocket connection closed");
 		},
 		share: true,
@@ -108,28 +105,22 @@ const GlobalChat = () => {
 			alignItems="center"
 		>
 			<Header />
-			<Heading my={5}>Messages:</Heading>
-			<Box
+			<Heading my={5}>Chat</Heading>
+			<Flex
 				bgColor="white"
-				w="50%"
-				h="100%"
+				w="90%"
+				h="75%"
+				gap={5}
 				p={5}
 				m={5}
 				borderRadius={5}
-				display="flex"
 				flexDirection="column"
-				justifyContent="space-evenly"
+				justifyContent="space-between"
 				boxShadow="xl"
 			>
-				<Box width="fit-content" border="1px solid black" px={3} py={2} boxShadow="xl">
-					<Text fontWeight="bold">
-						You are: {connectionState ? "Connected!" : "Not Connected!"}
-					</Text>
-				</Box>
-
 				<Messages lastJsonMessage={lastJsonMessage} firstName={firstName} />
-				<Box display="flex" flexDirection="row" boxShadow="lg" borderRadius={8}>
-					<Input
+				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
+					<Textarea
 						id="chat-message-field"
 						onChange={handleChatMessageChange}
 						value={chatMessage}
@@ -142,6 +133,7 @@ const GlobalChat = () => {
 						bgColor="gray.100"
 						focusBorderColor="gray.200"
 						boxShadow="inner"
+						resize="none"
 						borderColor={isButtonHovered ? "gray.100" : "gray.200"}
 						_focus={{
 							boxShadow: "none",
@@ -152,7 +144,8 @@ const GlobalChat = () => {
 							boxShadow: "none",
 						}}
 					/>
-					<Button
+					<Box
+						as="button"
 						id="chat-send-button"
 						onClick={handleSendMessage}
 						borderTopLeftRadius={0}
@@ -174,11 +167,12 @@ const GlobalChat = () => {
 						role="submit-message"
 						onMouseEnter={handleButtonHover}
 						onMouseLeave={handleButtonLeave}
+						w="15vh"
 					>
 						Send
-					</Button>
-				</Box>
-			</Box>
+					</Box>
+				</Flex>
+			</Flex>
 		</Box>
 	);
 };
