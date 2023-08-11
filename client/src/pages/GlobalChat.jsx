@@ -50,7 +50,6 @@ const GlobalChat = () => {
 			console.log("No message to send");
 		} else {
 			const content = chatMessage;
-
 			sendJsonMessage({
 				first_name: firstName,
 				userId: userId,
@@ -126,6 +125,7 @@ const GlobalChat = () => {
 						borderTopRightRadius={0}
 						borderBottomRightRadius={0}
 						borderRight={0}
+						rows={1}
 						maxH="30vh"
 						bgColor="gray.100"
 						focusBorderColor="gray.200"

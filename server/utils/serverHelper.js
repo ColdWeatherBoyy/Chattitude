@@ -21,7 +21,6 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 			connections.set(connectionId, userId);
 
 			const content = `${first_name} joined the chat`;
-			console.log(content);
 			chatMessages.push({ timestamp, content, connectionId });
 			saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 		}
@@ -33,6 +32,7 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 	}
 
 	const json = { chatMessages };
+	console.log(Object.keys(clients));
 
 	broadcastMessage(json, clients);
 }
@@ -64,14 +64,15 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 	const timestamp = getTimestamp();
 
 	const content = `${userFirstName} left the chat`;
-	const json = { type: "userevent" };
 	console.log(userFirstName, " disconnected");
-	chatMessages.push({ timestamp, content });
-	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
-	json.data = { users, chatMessages };
+	chatMessages.push({ timestamp, content, connectionId });
+	clients[connectionId].close();
+	delete clients[connectionId];
 	connections.delete(connectionId);
 	users.delete(userId);
-	broadcastMessage(json);
+	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
+	const json = { chatMessages };
+	broadcastMessage(json, clients);
 }
 
 async function saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI) {
