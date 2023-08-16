@@ -1,4 +1,4 @@
-const validateToken = async () => {
+export const validateToken = async () => {
 	try {
 		const response = await fetch("/api/user/validate", {
 			method: "GET",
@@ -17,4 +17,35 @@ const validateToken = async () => {
 	}
 };
 
-export default validateToken;
+export const validateTokenForDisplay = async () => {
+	try {
+		const response = await fetch("/api/user/validate", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		const data = await response.json();
+		const { first_name: firstName, _id: userId } = data.user;
+		// return first name and true
+		return { firstName, userId, valid: true };
+	} catch (error) {
+		return false;
+	}
+};
+
+export const logout = async () => {
+	try {
+		const response = await fetch("/api/user/logout", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		if (!response.ok) throw new Error("Error logging out");
+		console.log(response);
+		return response;
+	} catch (error) {
+		console.error(error);
+	}
+};

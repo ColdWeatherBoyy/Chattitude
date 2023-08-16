@@ -30,4 +30,8 @@ module.exports = {
 			res.status(400).json({ message: "Token is not valid" });
 		}
 	},
+	logout: function (req, res) {
+		res.clearCookie("chattitude-token");
+		return res.status(200).json({ message: "Logged out" });
+	},
 };

@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const { User } = require("../../models");
-const { signToken, auth } = require("../../utils/auth");
+const { signToken, auth, logout } = require("../../utils/auth");
+const { handleDisconnect } = require("../../utils/serverHelper.js");
 
 // **************************
 // *** User GET Routes ***
@@ -46,7 +47,7 @@ router.get("/get", auth, async (req, res) => {
 });
 
 // validate token route
-// /api/user/validate
+// /api/user/get/validate
 router.get("/validate/", auth, async (req, res) => {
 	try {
 		const decoded = req.user;
@@ -58,6 +59,17 @@ router.get("/validate/", auth, async (req, res) => {
 			return res.status(404).send({ error: "User not found." });
 		}
 		res.json({ message: "Token validated!", user });
+	} catch (error) {
+		res.status(400).json(error);
+	}
+});
+
+// logout user/clear token
+// /api/user/get/logout
+router.get("/logout", (req, res) => {
+	try {
+		logout(req, res);
+		res.status(200).json({ message: "Logout successful!" });
 	} catch (error) {
 		res.status(400).json(error);
 	}

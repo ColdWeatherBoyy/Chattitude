@@ -1,7 +1,48 @@
 import { Link as ReactRouterLink } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Box, Heading, Text, Link } from "@chakra-ui/react";
+import { validateTokenForDisplay, logout } from "../utils/auth.js";
 
 function Header() {
+	const [loading, setLoading] = useState(true);
+	const [validated, setValidated] = useState(false);
+	const [firstName, setFirstName] = useState("");
+	const [userId, setUserId] = useState("");
+
+	const handleLogout = async () => {
+		// figure out websocket stuff here
+
+		const response = await logout(userId);
+		if (response.ok && response.status === 200) {
+			setValidated(false);
+			setFirstName("");
+			setUserId("");
+		}
+		window.location.href = "/";
+	};
+
+	useEffect(() => {
+		const validateAndExtract = async () => {
+			const data = await validateTokenForDisplay();
+			if (data.valid) {
+				setValidated(true);
+				setFirstName(data.firstName);
+				setUserId(data.userId);
+			} else {
+				setValidated(false);
+				setFirstName("");
+				setUserId("");
+			}
+		};
+		validateAndExtract();
+	}, []);
+
+	useEffect(() => {
+		if (validated) {
+			setLoading(false);
+		}
+	}, [firstName]);
+
 	return (
 		<>
 			<Box
@@ -19,12 +60,25 @@ function Header() {
 					<Heading>Chattitude</Heading>
 				</Link>
 				<Box display="flex" flexDirection="row">
-					<Link as={ReactRouterLink} to="/login">
-						<Text mx={3}>Login</Text>
-					</Link>
-					<Link as={ReactRouterLink} to="/signup">
-						<Text mx={3}>Sign Up</Text>
-					</Link>
+					{!loading && validated ? (
+						<>
+							<Link>
+								<Text mx={3}>{firstName}</Text>
+							</Link>
+							<Link onClick={() => handleLogout()}>
+								<Text mx={3}>Logout</Text>
+							</Link>
+						</>
+					) : (
+						<>
+							<Link as={ReactRouterLink} to="/login">
+								<Text mx={3}>Login</Text>
+							</Link>
+							<Link as={ReactRouterLink} to="/signup">
+								<Text mx={3}>Sign Up</Text>
+							</Link>
+						</>
+					)}
 				</Box>
 			</Box>
 		</>

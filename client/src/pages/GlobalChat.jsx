@@ -3,7 +3,7 @@ import useWebSocket from "react-use-websocket";
 import { Box, Textarea, Flex, Heading } from "@chakra-ui/react";
 import Messages from "../components/Messages";
 import Header from "../components/Header";
-import validateToken from "../utils/auth";
+import { validateToken } from "../utils/auth";
 
 const WS_URL = "ws://127.0.0.1:3001";
 

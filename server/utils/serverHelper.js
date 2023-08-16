@@ -32,22 +32,8 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 	}
 
 	const json = { chatMessages };
-	console.log(Object.keys(clients));
 
 	broadcastMessage(json, clients);
-}
-
-// broadcast message to all connected clients
-function broadcastMessage(json, clients) {
-	// convert json to string
-	const data = JSON.stringify(json);
-	// loop through clients object to send data to each client
-	for (const connectionId in clients) {
-		const client = clients[connectionId];
-		if (client.readyState === WebSocket.OPEN) {
-			client.send(data);
-		}
-	}
 }
 
 function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
@@ -73,6 +59,19 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 	const json = { chatMessages };
 	broadcastMessage(json, clients);
+}
+
+// broadcast message to all connected clients
+function broadcastMessage(json, clients) {
+	// convert json to string
+	const data = JSON.stringify(json);
+	// loop through clients object to send data to each client
+	for (const connectionId in clients) {
+		const client = clients[connectionId];
+		if (client.readyState === WebSocket.OPEN) {
+			client.send(data);
+		}
+	}
 }
 
 async function saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI) {
