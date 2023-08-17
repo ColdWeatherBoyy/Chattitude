@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const { User } = require("../../models");
-const { signToken, auth, logout } = require("../../utils/auth");
-const { handleDisconnect } = require("../../utils/serverHelper.js");
+const { signToken, auth } = require("../../utils/auth");
+// const { handleLogout } = require("../../utils/serverHelper.js");
+const clients = require("../../server.js");
 
 // **************************
 // *** User GET Routes ***
@@ -65,10 +66,12 @@ router.get("/validate/", auth, async (req, res) => {
 });
 
 // logout user/clear token
-// /api/user/get/logout
-router.get("/logout", (req, res) => {
+// /api/user/logout
+router.post("/logout", (req, res) => {
 	try {
-		logout(req, res);
+		// const userId = req.body.userId;
+		// handleLogout(userId);
+		res.clearCookie("chattitude-token");
 		res.status(200).json({ message: "Logout successful!" });
 	} catch (error) {
 		res.status(400).json(error);

@@ -1,6 +1,5 @@
 const { WebSocket } = require("ws");
 const { getTimestamp } = require("./getTimestamp");
-const { connection } = require("mongoose");
 
 // Map used to track users
 const users = new Map();
@@ -60,6 +59,29 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 	const json = { chatMessages };
 	broadcastMessage(json, clients);
 }
+
+// function handleLogout(userId) {
+// 	console.log("handleLogout", userId);
+// 	if (!userId) {
+// 		return;
+// 	}
+
+// 	const userFirstName = users.get(userId).first_name;
+// 	if (!userFirstName) {
+// 		return;
+// 	}
+
+// 	const timestamp = getTimestamp();
+
+// 	const content = `${userFirstName} left the chat`;
+// 	console.log(userFirstName, " disconnected");
+// 	chatMessages.push({ timestamp, content });
+// 	connections.delete(userId);
+// 	users.delete(userId);
+// 	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
+// 	const json = { chatMessages };
+// 	broadcastMessage(json, clients);
+// }
 
 // broadcast message to all connected clients
 function broadcastMessage(json, clients) {

@@ -10,8 +10,6 @@ function Header() {
 	const [userId, setUserId] = useState("");
 
 	const handleLogout = async () => {
-		// figure out websocket stuff here
-
 		const response = await logout(userId);
 		if (response.ok && response.status === 200) {
 			setValidated(false);

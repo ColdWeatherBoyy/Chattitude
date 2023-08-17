@@ -25,25 +25,32 @@ export const validateTokenForDisplay = async () => {
 				"Content-Type": "application/json",
 			},
 		});
+		if (response.status === 401) {
+			return { valid: false };
+		}
+
+		if (!response.ok) {
+			return { valid: false };
+		}
 		const data = await response.json();
 		const { first_name: firstName, _id: userId } = data.user;
 		// return first name and true
 		return { firstName, userId, valid: true };
 	} catch (error) {
-		return false;
+		return { valid: false };
 	}
 };
 
-export const logout = async () => {
+export const logout = async (userId) => {
 	try {
 		const response = await fetch("/api/user/logout", {
-			method: "GET",
+			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
+			body: JSON.stringify({ userId }),
 		});
 		if (!response.ok) throw new Error("Error logging out");
-		console.log(response);
 		return response;
 	} catch (error) {
 		console.error(error);

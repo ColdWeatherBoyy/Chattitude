@@ -49,3 +49,6 @@ db.once("open", () => {
 		console.log(`Server running on port ${PORT}`);
 	});
 });
+
+// export clients
+module.exports = clients;
