@@ -1,6 +1,5 @@
 const { WebSocket } = require("ws");
 const { getTimestamp } = require("./getTimestamp");
-const { connection } = require("mongoose");
 
 // Map used to track users
 const users = new Map();
@@ -21,7 +20,6 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 			connections.set(connectionId, userId);
 
 			const content = `${first_name} joined the chat`;
-			console.log(content);
 			chatMessages.push({ timestamp, content, connectionId });
 			saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 		}
@@ -35,19 +33,6 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 	const json = { chatMessages };
 
 	broadcastMessage(json, clients);
-}
-
-// broadcast message to all connected clients
-function broadcastMessage(json, clients) {
-	// convert json to string
-	const data = JSON.stringify(json);
-	// loop through clients object to send data to each client
-	for (const connectionId in clients) {
-		const client = clients[connectionId];
-		if (client.readyState === WebSocket.OPEN) {
-			client.send(data);
-		}
-	}
 }
 
 function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
@@ -64,14 +49,51 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 	const timestamp = getTimestamp();
 
 	const content = `${userFirstName} left the chat`;
-	const json = { type: "userevent" };
 	console.log(userFirstName, " disconnected");
-	chatMessages.push({ timestamp, content });
-	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
-	json.data = { users, chatMessages };
+	chatMessages.push({ timestamp, content, connectionId });
+	clients[connectionId].close();
+	delete clients[connectionId];
 	connections.delete(connectionId);
 	users.delete(userId);
-	broadcastMessage(json);
+	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
+	const json = { chatMessages };
+	broadcastMessage(json, clients);
+}
+
+// function handleLogout(userId) {
+// 	console.log("handleLogout", userId);
+// 	if (!userId) {
+// 		return;
+// 	}
+
+// 	const userFirstName = users.get(userId).first_name;
+// 	if (!userFirstName) {
+// 		return;
+// 	}
+
+// 	const timestamp = getTimestamp();
+
+// 	const content = `${userFirstName} left the chat`;
+// 	console.log(userFirstName, " disconnected");
+// 	chatMessages.push({ timestamp, content });
+// 	connections.delete(userId);
+// 	users.delete(userId);
+// 	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
+// 	const json = { chatMessages };
+// 	broadcastMessage(json, clients);
+// }
+
+// broadcast message to all connected clients
+function broadcastMessage(json, clients) {
+	// convert json to string
+	const data = JSON.stringify(json);
+	// loop through clients object to send data to each client
+	for (const connectionId in clients) {
+		const client = clients[connectionId];
+		if (client.readyState === WebSocket.OPEN) {
+			client.send(data);
+		}
+	}
 }
 
 async function saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI) {

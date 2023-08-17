@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import useWebSocket from "react-use-websocket";
-import { Box, Input, Button, Text, Heading, border } from "@chakra-ui/react";
+import { Box, Textarea, Flex, Heading } from "@chakra-ui/react";
 import Messages from "../components/Messages";
 import Header from "../components/Header";
+import { validateToken } from "../utils/auth";
 
 const WS_URL = "ws://127.0.0.1:3001";
 
@@ -10,20 +11,21 @@ const GlobalChat = () => {
 	// State declarations
 	const [firstName, setFirstName] = useState("");
 	const [userId, setUserId] = useState("");
-	const [connectionState, setConnectionState] = useState(false);
 	const [chatMessage, setChatMessage] = useState("");
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
+
+	// useRef declarations
+	const chatTextarea = useRef(null);
 
 	// WebSocket Hook declarations
 	const { sendJsonMessage, readyState, lastJsonMessage } = useWebSocket(WS_URL, {
 		onOpen: () => {
-			setConnectionState(true);
 			console.log("WebSocket connection established");
 		},
 		onClose: () => {
-			setConnectionState(false);
 			console.log("WebSocket connection closed");
 		},
+		// Will attempt to reconnect on all close events, such as server shutting down
 		share: true,
 		retryOnError: true,
 		shouldReconnect: () => true,
@@ -31,37 +33,13 @@ const GlobalChat = () => {
 
 	// Helper Functions
 
-	// Validate token and set user info
-	const validateToken = async () => {
-		try {
-			const response = await fetch("/api/user/validate", {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			if (!response.ok) throw new Error("Invalid token");
-			const data = await response.json();
-			const firstName = data.user.first_name;
-			const userId = data.user._id;
-			setFirstName(firstName);
-			setUserId(userId);
-			sendJsonMessage({
-				first_name: firstName,
-				userId: userId,
-				content: `${firstName} has joined the chat`,
-				type: "userevent",
-			});
-		} catch (error) {
-			console.error(error);
-			// redirect to login page
-			window.location.href = "/login";
-		}
-	};
-
 	// Event Handlers
-	const handleChatMessageChange = () => {
-		setChatMessage(document.getElementById("chat-message-field").value);
+	const handleTextareaValueChange = () => {
+		// Update height of textarea
+		chatTextarea.current.style.height = "auto";
+		chatTextarea.current.style.height = `${chatTextarea.current.scrollHeight}px`;
+		// Update chatMessage state
+		setChatMessage(chatTextarea.current.value);
 	};
 
 	// Send message to server
@@ -72,7 +50,6 @@ const GlobalChat = () => {
 			console.log("No message to send");
 		} else {
 			const content = chatMessage;
-
 			sendJsonMessage({
 				first_name: firstName,
 				userId: userId,
@@ -84,6 +61,7 @@ const GlobalChat = () => {
 		}
 	};
 
+	// CSS Event Handlers
 	const handleButtonHover = () => {
 		setIsButtonHovered(true);
 	};
@@ -95,7 +73,18 @@ const GlobalChat = () => {
 	// useEffect declarations
 	// Validate user token on page load, redirect to login page if invalid
 	useEffect(() => {
-		validateToken();
+		const validateAndExtract = async () => {
+			const { firstName, userId } = await validateToken();
+			setFirstName(firstName);
+			setUserId(userId);
+			sendJsonMessage({
+				first_name: firstName,
+				userId: userId,
+				content: `${firstName} has joined the chat`,
+				type: "userevent",
+			});
+		};
+		validateAndExtract();
 	}, []);
 
 	return (
@@ -108,40 +97,40 @@ const GlobalChat = () => {
 			alignItems="center"
 		>
 			<Header />
-			<Heading my={5}>Messages:</Heading>
-			<Box
+			<Heading my={5}>Chat</Heading>
+			<Flex
 				bgColor="white"
-				w="50%"
-				h="100%"
+				w="90%"
+				h="75%"
+				gap={5}
 				p={5}
 				m={5}
-				borderRadius={5}
-				display="flex"
+				borderRadius={8}
 				flexDirection="column"
-				justifyContent="space-evenly"
+				justifyContent="space-between"
 				boxShadow="xl"
 			>
-				<Box width="fit-content" border="1px solid black" px={3} py={2} boxShadow="xl">
-					<Text fontWeight="bold">
-						You are: {connectionState ? "Connected!" : "Not Connected!"}
-					</Text>
-				</Box>
-
 				<Messages lastJsonMessage={lastJsonMessage} firstName={firstName} />
-				<Box display="flex" flexDirection="row" boxShadow="lg" borderRadius={8}>
-					<Input
-						id="chat-message-field"
-						onChange={handleChatMessageChange}
+				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
+					<Textarea
+						ref={chatTextarea}
+						onInput={handleTextareaValueChange}
 						value={chatMessage}
-						onKeyUp={(event) => {
-							if (event.key === "Enter") handleSendMessage();
+						onKeyDown={(event) => {
+							if (event.key === "Enter" && !event.shiftKey) {
+								event.preventDefault();
+								handleSendMessage();
+							}
 						}}
 						borderTopRightRadius={0}
 						borderBottomRightRadius={0}
 						borderRight={0}
+						rows={1}
+						maxH="30vh"
 						bgColor="gray.100"
 						focusBorderColor="gray.200"
 						boxShadow="inner"
+						resize="none"
 						borderColor={isButtonHovered ? "gray.100" : "gray.200"}
 						_focus={{
 							boxShadow: "none",
@@ -152,8 +141,8 @@ const GlobalChat = () => {
 							boxShadow: "none",
 						}}
 					/>
-					<Button
-						id="chat-send-button"
+					<Box
+						as="button"
 						onClick={handleSendMessage}
 						borderTopLeftRadius={0}
 						borderBottomLeftRadius={0}
@@ -171,14 +160,15 @@ const GlobalChat = () => {
 						_focus={{
 							outline: "none",
 						}}
-						role="submit-message"
+						role="submit-message-button"
 						onMouseEnter={handleButtonHover}
 						onMouseLeave={handleButtonLeave}
+						w="15vh"
 					>
 						Send
-					</Button>
-				</Box>
-			</Box>
+					</Box>
+				</Flex>
+			</Flex>
 		</Box>
 	);
 };

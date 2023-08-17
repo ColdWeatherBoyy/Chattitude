@@ -93,12 +93,11 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 		<>
 			<Box
 				minHeight="2rem"
-				h="50vh"
 				overflowY="scroll"
 				ref={scrollableRef}
 				display="flex"
 				flexDirection="column"
-				p={4}
+				p={2}
 				border="2px solid"
 				borderColor="gray.300"
 				boxShadow="inner"
@@ -158,22 +157,21 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 								borderColor="gray.100"
 								color="black"
 								borderRadius={8}
-								px={3}
-								py={1}
+								px={4}
+								py={4}
 								boxShadow="sm"
 							>
 								{type === "chatevent" ? (
 									<Flex w="100%" justifyContent="space-between" alignItems="center">
 										<Flex alignItems="center">
 											<Text
-												mr={4}
 												color={userName === firstName ? "brand.300" : "red.400"}
 												fontWeight="bold"
 												fontSize="sm"
 											>
 												{userName}:
 											</Text>
-											<Text fontSize="md" pr={8}>
+											<Text fontSize="md" px={8} wordBreak="break-word">
 												{messageContent}
 											</Text>
 										</Flex>
