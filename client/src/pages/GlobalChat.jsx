@@ -19,16 +19,18 @@ const GlobalChat = () => {
 
 	// WebSocket Hook declarations
 	const { sendJsonMessage, readyState, lastJsonMessage } = useWebSocket(WS_URL, {
-		onOpen: () => {
-			console.log("WebSocket connection established");
-		},
-		onClose: () => {
-			console.log("WebSocket connection closed");
-		},
-		// Will attempt to reconnect on all close events, such as server shutting down
+		onOpen: () => console.log("WebSocket connection opened"),
+		onClose: () => console.log("WebSocket connection closed"),
 		share: true,
 		retryOnError: true,
-		shouldReconnect: () => true,
+		// set reconnect logic to attempt reconnect once every 3 seconds if connection fails, and is not intentional by the client
+		shouldReconnect: (closeEvent) => {
+			if (closeEvent.code === 1000) {
+				return false;
+			}
+			console.log("WebSocket connection failed, retrying in 3 seconds");
+			return true;
+		},
 	});
 
 	// Helper Functions

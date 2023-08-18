@@ -4,6 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
+		"build": "cd client && npm run build",
 		"install": "concurrently \"cd client && npm install\" \"cd server && npm install\"",
 		"dev": "concurrently \"cd client && npm run dev\" \"cd server && npm run watch\""
 	},
