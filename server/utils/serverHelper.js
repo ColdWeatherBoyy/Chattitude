@@ -17,7 +17,10 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 	const dataFromClient = JSON.parse(message.toString());
 	const timestamp = getTimestamp();
 
-	if (JSON.stringify(dataFromClient) === JSON.stringify(lastReceivedMessage)) {
+	if (
+		JSON.stringify(dataFromClient) === JSON.stringify(lastReceivedMessage) &&
+		dataFromClient.type === "userevent"
+	) {
 		console.log("Identical message received, ignoring.");
 		return;
 	}

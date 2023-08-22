@@ -79,6 +79,7 @@ const GlobalChat = () => {
 			const { firstName, userId } = await validateToken();
 			setFirstName(firstName);
 			setUserId(userId);
+
 			sendJsonMessage({
 				first_name: firstName,
 				userId: userId,
@@ -86,8 +87,14 @@ const GlobalChat = () => {
 				type: "userevent",
 			});
 		};
-		validateAndExtract();
-	}, []);
+
+		// Check WebSocket connection state before sending the message
+		if (readyState === 1) {
+			validateAndExtract();
+		} else {
+			console.log("WebSocket not connected");
+		}
+	}, [readyState]);
 
 	return (
 		<Box

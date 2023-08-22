@@ -94,6 +94,23 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 			<Box
 				minHeight="2rem"
 				overflowY="scroll"
+				css={{
+					"&::-webkit-scrollbar": {
+						width: 8,
+					},
+					"&::-webkit-scrollbar-track": {
+						backgroundColor: "transparent",
+					},
+					"&::-webkit-scrollbar-thumb": {
+						borderRadius: 8,
+						backgroundColor: "transparent",
+						border: "none",
+						transition: "background-color 0.2s", // Add transition for fading in
+					},
+					"&:hover::-webkit-scrollbar-thumb": {
+						backgroundColor: "gray", // Fade-in effect on hover
+					},
+				}}
 				ref={scrollableRef}
 				display="flex"
 				flexDirection="column"
@@ -103,9 +120,6 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 				boxShadow="inner"
 				borderRadius={8}
 				bg="gray.200"
-				css={{
-					scrollbarGutter: "none",
-				}}
 			>
 				{loadMoreState ? (
 					<Flex
