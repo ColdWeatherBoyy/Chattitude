@@ -103,12 +103,11 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 					},
 					"&::-webkit-scrollbar-thumb": {
 						borderRadius: 8,
-						backgroundColor: "transparent",
 						border: "none",
-						transition: "background-color 0.2s", // Add transition for fading in
+						background: "#aaa",
 					},
-					"&:hover::-webkit-scrollbar-thumb": {
-						backgroundColor: "gray", // Fade-in effect on hover
+					"&::-webkit-scrollbar-thumb:hover": {
+						background: "#999",
 					},
 				}}
 				ref={scrollableRef}

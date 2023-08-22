@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, forwardRef } from "react";
 import useWebSocket from "react-use-websocket";
 import { Box, Textarea, Flex, Heading } from "@chakra-ui/react";
 import Messages from "../components/Messages";
 import Header from "../components/Header";
+import ResizeTextarea from "react-textarea-autosize";
 import { validateToken } from "../utils/auth";
 
 const WS_URL = "ws://127.0.0.1:3001";
@@ -11,7 +12,6 @@ const GlobalChat = () => {
 	// State declarations
 	const [firstName, setFirstName] = useState("");
 	const [userId, setUserId] = useState("");
-	const [chatMessage, setChatMessage] = useState("");
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
 
 	// useRef declarations
@@ -33,25 +33,19 @@ const GlobalChat = () => {
 		},
 	});
 
-	// Helper Functions
-
-	// Event Handlers
-	const handleTextareaValueChange = () => {
-		// Update height of textarea
-		chatTextarea.current.style.height = "auto";
-		chatTextarea.current.style.height = `${chatTextarea.current.scrollHeight}px`;
-		// Update chatMessage state
-		setChatMessage(chatTextarea.current.value);
-	};
+	// Custom Components
+	const AutoResizeTextarea = forwardRef((props, ref) => {
+		return <Textarea ref={ref} as={ResizeTextarea} autoFocus {...props} />;
+	});
 
 	// Send message to server
 	const handleSendMessage = () => {
 		if (readyState !== 1) {
 			console.log("WebSocket not connected");
-		} else if (!chatMessage) {
+		} else if (!chatTextarea.current.value) {
 			console.log("No message to send");
 		} else {
-			const content = chatMessage;
+			const content = chatTextarea.current.value;
 			sendJsonMessage({
 				first_name: firstName,
 				userId: userId,
@@ -59,7 +53,7 @@ const GlobalChat = () => {
 				type: "chatevent",
 			});
 
-			setChatMessage("");
+			chatTextarea.current.value = "";
 		}
 	};
 
@@ -121,10 +115,8 @@ const GlobalChat = () => {
 			>
 				<Messages lastJsonMessage={lastJsonMessage} firstName={firstName} />
 				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
-					<Textarea
+					<AutoResizeTextarea
 						ref={chatTextarea}
-						onInput={handleTextareaValueChange}
-						value={chatMessage}
 						onKeyDown={(event) => {
 							if (event.key === "Enter" && !event.shiftKey) {
 								event.preventDefault();
