@@ -139,6 +139,22 @@ const GlobalChat = () => {
 						_hover={{
 							boxShadow: "none",
 						}}
+						css={{
+							"&::-webkit-scrollbar": {
+								width: 8,
+							},
+							"&::-webkit-scrollbar-track": {
+								backgroundColor: "transparent",
+							},
+							"&::-webkit-scrollbar-thumb": {
+								borderRadius: 8,
+								border: "none",
+								background: "#aaa",
+							},
+							"&::-webkit-scrollbar-thumb:hover": {
+								background: "#999",
+							},
+						}}
 					/>
 					<Box
 						as="button"
