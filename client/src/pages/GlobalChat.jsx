@@ -1,15 +1,16 @@
 import { useEffect, useState, useRef, forwardRef } from "react";
 import useWebSocket from "react-use-websocket";
-import { Box, Textarea, Flex, Heading } from "@chakra-ui/react";
+import { Box, Flex, Heading } from "@chakra-ui/react";
 import Messages from "../components/Messages";
 import Header from "../components/Header";
-import ResizeTextarea from "react-textarea-autosize";
+import AutoResizeTextarea from "../components/ResizeTextarea";
 import { validateToken } from "../utils/auth";
 
 const WS_URL = "ws://127.0.0.1:3001";
 
 const GlobalChat = () => {
 	// State declarations
+	const [textareaInputValue, setTextareaInputValue] = useState("");
 	const [firstName, setFirstName] = useState("");
 	const [userId, setUserId] = useState("");
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
@@ -33,19 +34,14 @@ const GlobalChat = () => {
 		},
 	});
 
-	// Custom Components
-	const AutoResizeTextarea = forwardRef((props, ref) => {
-		return <Textarea ref={ref} as={ResizeTextarea} autoFocus {...props} />;
-	});
-
 	// Send message to server
 	const handleSendMessage = () => {
 		if (readyState !== 1) {
 			console.log("WebSocket not connected");
-		} else if (!chatTextarea.current.value) {
+		} else if (!textareaInputValue) {
 			console.log("No message to send");
 		} else {
-			const content = chatTextarea.current.value;
+			const content = textareaInputValue;
 			sendJsonMessage({
 				first_name: firstName,
 				userId: userId,
@@ -53,7 +49,7 @@ const GlobalChat = () => {
 				type: "chatevent",
 			});
 
-			chatTextarea.current.value = "";
+			setTextareaInputValue("");
 		}
 	};
 
@@ -117,6 +113,8 @@ const GlobalChat = () => {
 				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
 					<AutoResizeTextarea
 						ref={chatTextarea}
+						textareaInputValue={textareaInputValue}
+						setTextareaInputValue={setTextareaInputValue}
 						onKeyDown={(event) => {
 							if (event.key === "Enter" && !event.shiftKey) {
 								event.preventDefault();
