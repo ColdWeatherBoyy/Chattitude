@@ -148,16 +148,20 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 					messages.map((message, index) => {
 						const { timestamp, content } = message;
 						let type;
-						let messageContent;
+						let messageContentNonSplit;
 						let userName;
 						// break content apart by : to style separately
 						if (content.includes(":")) {
-							[userName, messageContent] = content.split(":");
+							[userName, messageContentNonSplit] = content.split(":");
 							type = "chatevent";
 						} else {
 							type = "userevent";
-							messageContent = content;
+							messageContentNonSplit = content;
 						}
+
+						// make sure all linebreaks are rendered
+						const messageContent = messageContentNonSplit.replace(/\n/g, "<br />");
+
 						return (
 							<Flex
 								key={`message${index}`}
@@ -184,9 +188,12 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 											>
 												{userName}:
 											</Text>
-											<Text fontSize="md" px={8} wordBreak="break-word">
-												{messageContent}
-											</Text>
+											<Text
+												fontSize="md"
+												px={8}
+												wordBreak="break-word"
+												dangerouslySetInnerHTML={{ __html: messageContent }}
+											/>
 										</Flex>
 										<Text fontSize="2xs" color="gray.600">
 											{timestamp}
@@ -199,9 +206,11 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 										alignItems="center"
 										fontSize="2xs"
 									>
-										<Text>
-											{messageContent} - {timestamp}
-										</Text>
+										<Text
+											dangerouslySetInnerHTML={{
+												__html: `${messageContent} - ${timestamp}`,
+											}}
+										/>
 									</Flex>
 								)}
 							</Flex>

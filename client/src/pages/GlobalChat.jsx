@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, forwardRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import useWebSocket from "react-use-websocket";
 import { Box, Flex, Heading } from "@chakra-ui/react";
 import Messages from "../components/Messages";
