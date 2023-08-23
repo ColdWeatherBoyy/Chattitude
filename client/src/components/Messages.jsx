@@ -1,5 +1,5 @@
 import { Box, Text, Flex } from "@chakra-ui/react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import Loader from "./Loader";
 
 const Messages = ({ lastJsonMessage, firstName }) => {
@@ -94,6 +94,7 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 			<Box
 				minHeight="2rem"
 				overflowY="scroll"
+				overflowX="hidden"
 				css={{
 					"&::-webkit-scrollbar": {
 						width: 8,
@@ -148,19 +149,19 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 					messages.map((message, index) => {
 						const { timestamp, content } = message;
 						let type;
-						let messageContentNonSplit;
+						let messageContent;
 						let userName;
 						// break content apart by : to style separately
 						if (content.includes(":")) {
-							[userName, messageContentNonSplit] = content.split(":");
+							const firstColonIndex = content.indexOf(":");
+
+							userName = content.slice(0, firstColonIndex);
+							messageContent = content.slice(firstColonIndex + 1).split("\n");
 							type = "chatevent";
 						} else {
 							type = "userevent";
-							messageContentNonSplit = content;
+							messageContent = content;
 						}
-
-						// make sure all linebreaks are rendered
-						const messageContent = messageContentNonSplit.replace(/\n/g, "<br />");
 
 						return (
 							<Flex
@@ -175,7 +176,7 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 								color="black"
 								borderRadius={8}
 								px={4}
-								py={4}
+								py={3}
 								boxShadow="sm"
 							>
 								{type === "chatevent" ? (
@@ -188,12 +189,16 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 											>
 												{userName}:
 											</Text>
-											<Text
-												fontSize="md"
-												px={8}
-												wordBreak="break-word"
-												dangerouslySetInnerHTML={{ __html: messageContent }}
-											/>
+											<Text fontSize="md" px={4} wordBreak="break-word" whiteSpace="pre">
+												{messageContent.map((line, index) => {
+													return (
+														<Fragment key={`line${index}`}>
+															{line}
+															<br />
+														</Fragment>
+													);
+												})}
+											</Text>
 										</Flex>
 										<Text fontSize="2xs" color="gray.600">
 											{timestamp}
@@ -206,11 +211,9 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 										alignItems="center"
 										fontSize="2xs"
 									>
-										<Text
-											dangerouslySetInnerHTML={{
-												__html: `${messageContent} - ${timestamp}`,
-											}}
-										/>
+										<Text>
+											{messageContent} - {timestamp}
+										</Text>
 									</Flex>
 								)}
 							</Flex>
