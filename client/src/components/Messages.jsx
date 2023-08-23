@@ -156,7 +156,7 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 							const firstColonIndex = content.indexOf(":");
 
 							userName = content.slice(0, firstColonIndex);
-							messageContent = content.slice(firstColonIndex + 1).split("\n");
+							messageContent = content.slice(firstColonIndex + 1);
 							type = "chatevent";
 						} else {
 							type = "userevent";
@@ -190,14 +190,7 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 												{userName}:
 											</Text>
 											<Text fontSize="md" px={4} wordBreak="break-word" whiteSpace="pre">
-												{messageContent.map((line, index) => {
-													return (
-														<Fragment key={`line${index}`}>
-															{line}
-															<br />
-														</Fragment>
-													);
-												})}
+												{messageContent}
 											</Text>
 										</Flex>
 										<Text fontSize="2xs" color="gray.600">
