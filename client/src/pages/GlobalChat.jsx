@@ -1,8 +1,19 @@
 import { useEffect, useState, useRef } from "react";
 import useWebSocket from "react-use-websocket";
-import { Box, Flex, Heading } from "@chakra-ui/react";
+import {
+	Box,
+	Flex,
+	Heading,
+	Drawer,
+	DrawerOverlay,
+	DrawerHeader,
+	DrawerBody,
+	DrawerContent,
+	useDisclosure,
+} from "@chakra-ui/react";
 import Messages from "../components/Messages";
 import Header from "../components/Header";
+import BrandButton from "../components/BrandButton";
 import AutoResizeTextarea from "../components/ResizeTextarea";
 import { validateToken } from "../utils/auth";
 
@@ -14,6 +25,8 @@ const GlobalChat = () => {
 	const [firstName, setFirstName] = useState("");
 	const [userId, setUserId] = useState("");
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
+	const [connectedUsers, setConnectedUsers] = useState([]);
+	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	// useRef declarations
 	const chatTextarea = useRef(null);
@@ -33,6 +46,13 @@ const GlobalChat = () => {
 			return true;
 		},
 	});
+
+	useEffect(() => {
+		if (lastJsonMessage) {
+			setConnectedUsers(lastJsonMessage.users);
+			console.log(lastJsonMessage.users);
+		}
+	}, [lastJsonMessage]);
 
 	// Send message to server
 	const handleSendMessage = () => {
@@ -97,6 +117,30 @@ const GlobalChat = () => {
 		>
 			<Header />
 			<Heading my={5}>Chat</Heading>
+			<BrandButton onClick={onOpen}>Online Users</BrandButton>
+			<Drawer isOpen={isOpen} placement="left" onClose={onClose}>
+				<DrawerOverlay />
+				<DrawerContent>
+					<DrawerHeader>
+						<Flex alignItems="center" justifyContent="space-between">
+							<Heading as="h3" size="md">
+								Online Users
+							</Heading>
+							<Box ml={5} fontSize="md" onClick={onClose} cursor="pointer">
+								X
+							</Box>
+						</Flex>
+					</DrawerHeader>
+					<DrawerBody>
+						{connectedUsers.map((user) => (
+							<Flex alignItems="center">
+								<Box w="10px" h="10px" borderRadius="50%" bgColor="green.400" mr={2} />
+								{user}
+							</Flex>
+						))}
+					</DrawerBody>
+				</DrawerContent>
+			</Drawer>
 			<Flex
 				bgColor="white"
 				w="90%"

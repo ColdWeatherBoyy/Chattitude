@@ -82,6 +82,10 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 
 // broadcast message to all connected clients
 function broadcastMessage(json, clients) {
+	const usersNamesArr = Array.from(users.values());
+	json.users = usersNamesArr.map((user) => user.first_name);
+	console.log(json.users);
+
 	// convert json to string
 	const data = JSON.stringify(json);
 	// loop through clients object to send data to each client

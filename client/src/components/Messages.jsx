@@ -97,7 +97,7 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 				overflowX="hidden"
 				css={{
 					"&::-webkit-scrollbar": {
-						width: 8,
+						width: 10,
 					},
 					"&::-webkit-scrollbar-track": {
 						backgroundColor: "transparent",
@@ -189,7 +189,12 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 											>
 												{userName}:
 											</Text>
-											<Text fontSize="md" px={4} wordBreak="break-word" whiteSpace="pre">
+											<Text
+												fontSize="md"
+												px={4}
+												wordBreak="break-word"
+												whiteSpace="pre-wrap"
+											>
 												{messageContent}
 											</Text>
 										</Flex>
