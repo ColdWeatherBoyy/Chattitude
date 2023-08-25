@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import useWebSocket from "react-use-websocket";
+import { Mutex } from "async-mutex";
 import {
 	Box,
 	Flex,
@@ -27,6 +28,7 @@ const GlobalChat = () => {
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
 	const [connectedUsers, setConnectedUsers] = useState([]);
 	const { isOpen, onOpen, onClose } = useDisclosure();
+	const mutex = useMemo(() => new Mutex(), []);
 
 	// useRef declarations
 	const chatTextarea = useRef(null);
@@ -133,7 +135,7 @@ const GlobalChat = () => {
 					</DrawerHeader>
 					<DrawerBody>
 						{connectedUsers.map((user) => (
-							<Flex alignItems="center">
+							<Flex key={user} alignItems="center">
 								<Box w="10px" h="10px" borderRadius="50%" bgColor="green.400" mr={2} />
 								{user}
 							</Flex>
@@ -153,7 +155,7 @@ const GlobalChat = () => {
 				justifyContent="space-between"
 				boxShadow="xl"
 			>
-				<Messages lastJsonMessage={lastJsonMessage} firstName={firstName} />
+				<Messages lastJsonMessage={lastJsonMessage} firstName={firstName} mutex={mutex} />
 				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
 					<AutoResizeTextarea
 						ref={chatTextarea}

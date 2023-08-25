@@ -1,13 +1,17 @@
 import { Box, Text, Flex } from "@chakra-ui/react";
-import { useState, useEffect, useRef, Fragment } from "react";
+import { useState, useEffect, useRef } from "react";
 import Loader from "./Loader";
 
-const Messages = ({ lastJsonMessage, firstName }) => {
+const Messages = ({ lastJsonMessage, firstName, mutex }) => {
 	const [messages, setMessages] = useState([]);
 	const [loadMoreState, setLoadMoreState] = useState(false);
 	const scrollableRef = useRef();
 
 	// functions to get Messages from the database
+
+	// window.debugMessages = function () {
+	// 	return messages;
+	// };
 
 	// get the most recent twenty messages from the database
 	async function getMessages() {
@@ -20,7 +24,7 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 				},
 			});
 			if (!mostRecentTwentyMessages.ok)
-				throw new Error("Error getting last hour of chat");
+				throw new Error("Error getting last twenty messages");
 			const data = await mostRecentTwentyMessages.json();
 			return data;
 		} catch (err) {
@@ -63,21 +67,30 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 
 	// determine where to get message data from
 	async function fetchData() {
-		if (!lastJsonMessage || lastJsonMessage.chatMessages.length === 0) {
-			const data = await getMessages();
-			setMessages(data);
-		} else {
-			setMessages((messages) => [
-				...messages,
-				lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1],
-			]);
-		}
+		await mutex.runExclusive(async () => {
+			if (!lastJsonMessage || lastJsonMessage.chatMessages.length === 0) {
+				console.log("acorn");
+				const data = await getMessages();
+
+				console.log("tomato");
+				setMessages(data);
+			} else {
+				console.log(
+					"dingle",
+					lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1]
+				);
+				setMessages((messages) => [
+					...messages,
+					lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1],
+				]);
+			}
+		});
 	}
 
 	// get messages on mount and when a new message is sent
 	useEffect(() => {
 		fetchData();
-	}, [lastJsonMessage]);
+	}, [lastJsonMessage, mutex]);
 
 	// scroll to the bottom of the chat box on mount and when a new message is sent, if the user has not clicked load more
 	useEffect(() => {

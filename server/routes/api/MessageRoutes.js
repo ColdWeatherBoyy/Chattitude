@@ -24,7 +24,7 @@ router.get("/get/mostRecentTwenty", async (req, res) => {
 	try {
 		const messageData = await Message.find({})
 			.sort({ time: -1 })
-			.limit(20)
+			.limit(3)
 			.populate("userId");
 		const reversedMessages = messageData.sort((a, b) => a.time - b.time);
 		res.status(200).json(reversedMessages);

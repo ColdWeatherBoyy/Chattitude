@@ -84,7 +84,6 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 function broadcastMessage(json, clients) {
 	const usersNamesArr = Array.from(users.values());
 	json.users = usersNamesArr.map((user) => user.first_name);
-	console.log(json.users);
 
 	// convert json to string
 	const data = JSON.stringify(json);
@@ -92,6 +91,7 @@ function broadcastMessage(json, clients) {
 	for (const connectionId in clients) {
 		const client = clients[connectionId];
 		if (client.readyState === WebSocket.OPEN) {
+			console.log(data);
 			client.send(data);
 		}
 	}
