@@ -1,6 +1,5 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import useWebSocket from "react-use-websocket";
-import { Mutex } from "async-mutex";
 import {
 	Box,
 	Flex,
@@ -17,6 +16,7 @@ import Header from "../components/Header";
 import BrandButton from "../components/BrandButton";
 import AutoResizeTextarea from "../components/ResizeTextarea";
 import { validateToken } from "../utils/auth";
+import { getMessages } from "../utils/messageHelpers";
 
 const WS_URL = "ws://127.0.0.1:3001";
 
@@ -25,10 +25,10 @@ const GlobalChat = () => {
 	const [textareaInputValue, setTextareaInputValue] = useState("");
 	const [firstName, setFirstName] = useState("");
 	const [userId, setUserId] = useState("");
+	const [messages, setMessages] = useState([]);
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
 	const [connectedUsers, setConnectedUsers] = useState([]);
 	const { isOpen, onOpen, onClose } = useDisclosure();
-	const mutex = useMemo(() => new Mutex(), []);
 
 	// useRef declarations
 	const chatTextarea = useRef(null);
@@ -52,7 +52,6 @@ const GlobalChat = () => {
 	useEffect(() => {
 		if (lastJsonMessage) {
 			setConnectedUsers(lastJsonMessage.users);
-			console.log(lastJsonMessage.users);
 		}
 	}, [lastJsonMessage]);
 
@@ -91,6 +90,9 @@ const GlobalChat = () => {
 			const { firstName, userId } = await validateToken();
 			setFirstName(firstName);
 			setUserId(userId);
+
+			const data = await getMessages();
+			setMessages(data);
 
 			sendJsonMessage({
 				first_name: firstName,
@@ -155,7 +157,12 @@ const GlobalChat = () => {
 				justifyContent="space-between"
 				boxShadow="xl"
 			>
-				<Messages lastJsonMessage={lastJsonMessage} firstName={firstName} mutex={mutex} />
+				<Messages
+					lastJsonMessage={lastJsonMessage}
+					firstName={firstName}
+					messages={messages}
+					setMessages={setMessages}
+				/>
 				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
 					<AutoResizeTextarea
 						ref={chatTextarea}

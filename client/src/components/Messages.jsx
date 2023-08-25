@@ -1,89 +1,36 @@
 import { Box, Text, Flex } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
+import { getMoreMessages } from "../utils/messageHelpers";
 import Loader from "./Loader";
 
-const Messages = ({ lastJsonMessage, firstName, mutex }) => {
-	const [messages, setMessages] = useState([]);
+const Messages = ({ lastJsonMessage, firstName, messages, setMessages }) => {
 	const [loadMoreState, setLoadMoreState] = useState(false);
 	const scrollableRef = useRef();
 
-	// functions to get Messages from the database
-
-	// get the most recent twenty messages from the database
-	async function getMessages() {
-		try {
-			// get the last twenty messages from the database
-			const mostRecentTwentyMessages = await fetch("/api/message/get/mostRecentTwenty", {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			if (!mostRecentTwentyMessages.ok)
-				throw new Error("Error getting last twenty messages");
-			const data = await mostRecentTwentyMessages.json();
-			return data;
-		} catch (err) {
-			console.log(err);
-		}
-	}
-
-	// get the next twenty messages from the database
-	async function getMoreMessages() {
-		try {
-			// get the message Id for the last message in the chat box
-			const lastMessageId = messages[0]._id;
-			// get the next twenty messages from the database, given the last message
-			const nextTwentyMessages = await fetch(
-				`/api/message/get/nextTwentyMessages/${lastMessageId}`,
-				{
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
-			if (!nextTwentyMessages.ok) throw new Error("Error getting next twenty messages");
-			const data = await nextTwentyMessages.json();
-			// update state with the new messages
-			setMessages((messages) => [...data, ...messages]);
-		} catch (err) {
-			console.log(err);
-		}
-	}
-
+	// Handles getting more messages from the db for the chat box
 	const handleGetMoreMessages = () => {
 		// set load more state for scrolling
 		setLoadMoreState(true);
 		// delay the call
 		setTimeout(() => {
-			getMoreMessages();
+			getMoreMessages(messages, setMessages);
 		}, 500);
 	};
 
-	// determine where to get message data from
-	async function fetchData() {
-		await mutex.runExclusive(async () => {
-			if (messages.length === 0) {
-				const data = await getMessages();
-				console.log("tomato");
-				setMessages(data);
-			} else if (lastJsonMessage) {
-				console.log("dingle");
-				setMessages((messages) => [
-					...messages,
-					lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1],
-				]);
-			} else {
-				console.log("leg");
-			}
-		});
+	// Render new message to page
+	async function renderNewMessage() {
+		if (lastJsonMessage) {
+			setMessages((messages) => [
+				...messages,
+				lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1],
+			]);
+		}
 	}
 
 	// get messages on mount and when a new message is sent
 	useEffect(() => {
-		fetchData();
-	}, [lastJsonMessage, mutex]);
+		renderNewMessage();
+	}, [lastJsonMessage]);
 
 	// scroll to the bottom of the chat box on mount and when a new message is sent, if the user has not clicked load more
 	useEffect(() => {
