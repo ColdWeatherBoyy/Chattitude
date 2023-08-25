@@ -9,14 +9,10 @@ const Messages = ({ lastJsonMessage, firstName, mutex }) => {
 
 	// functions to get Messages from the database
 
-	// window.debugMessages = function () {
-	// 	return messages;
-	// };
-
 	// get the most recent twenty messages from the database
 	async function getMessages() {
 		try {
-			// get the last twent messages from the database
+			// get the last twenty messages from the database
 			const mostRecentTwentyMessages = await fetch("/api/message/get/mostRecentTwenty", {
 				method: "GET",
 				headers: {
@@ -68,21 +64,18 @@ const Messages = ({ lastJsonMessage, firstName, mutex }) => {
 	// determine where to get message data from
 	async function fetchData() {
 		await mutex.runExclusive(async () => {
-			if (!lastJsonMessage || lastJsonMessage.chatMessages.length === 0) {
-				console.log("acorn");
+			if (messages.length === 0) {
 				const data = await getMessages();
-
 				console.log("tomato");
 				setMessages(data);
-			} else {
-				console.log(
-					"dingle",
-					lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1]
-				);
+			} else if (lastJsonMessage) {
+				console.log("dingle");
 				setMessages((messages) => [
 					...messages,
 					lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1],
 				]);
+			} else {
+				console.log("leg");
 			}
 		});
 	}

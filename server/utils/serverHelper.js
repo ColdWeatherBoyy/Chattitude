@@ -91,7 +91,6 @@ function broadcastMessage(json, clients) {
 	for (const connectionId in clients) {
 		const client = clients[connectionId];
 		if (client.readyState === WebSocket.OPEN) {
-			console.log(data);
 			client.send(data);
 		}
 	}
