@@ -1,3 +1,7 @@
+// ***************************************************************
+// ***************** Authentification Functions ******************
+
+// Function to validate token on page load – these should be combined
 export const validateToken = async () => {
 	try {
 		const response = await fetch("/api/user/validate", {
@@ -19,6 +23,7 @@ export const validateToken = async () => {
 	}
 };
 
+// Function to validate token on page load – these should be combined
 export const validateTokenForDisplay = async () => {
 	try {
 		const response = await fetch("/api/user/validate", {
@@ -43,6 +48,7 @@ export const validateTokenForDisplay = async () => {
 	}
 };
 
+// Function to log user out
 export const logout = async (userId) => {
 	try {
 		const response = await fetch("/api/user/logout", {

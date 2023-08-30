@@ -44,6 +44,10 @@ const GlobalChat = () => {
 
 	// WebSocket Hook declarations
 	const { sendJsonMessage, readyState, lastJsonMessage } = useWebSocket(WS_URL, {
+		// readyState is a value provided by the hook to check the connection state of the webSocket
+		// lastJsonMessage is a value provided by the hook to check the last message received from the webSocket
+		// sendJsonMessage is a function provided by the hook to send messages to the webSocket server
+
 		// Console.logs for debugging on Open and Close
 		onOpen: () => console.log("WebSocket connection opened"),
 		onClose: () => console.log("WebSocket connection closed"),

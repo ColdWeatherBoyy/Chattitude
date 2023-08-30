@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import App from "./App.jsx";
+import Home from "./pages/Home.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import GlobalChat from "./pages/GlobalChat.jsx";
@@ -11,10 +11,11 @@ import theme from "./theme/theme.js";
 import "./index.css";
 import "./theme/fonts.css";
 
+// Create a router using the createBrowserRouter function.
 const router = createBrowserRouter([
 	{
 		path: "/",
-		element: <App />,
+		element: <Home />,
 	},
 	{
 		path: "/login",
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
 		path: "/GlobalChat",
 		element: <GlobalChat />,
 	},
+	// Need to fix this so that this route is only accessible if the user is logged in
 	{
 		path: "/:id",
 		element: <UserPage />,
@@ -40,7 +42,9 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")).render(
 	<React.StrictMode>
+		{/* Chakra Provider */}
 		<ChakraProvider theme={theme}>
+			{/* Router Provider */}
 			<RouterProvider router={router} />
 		</ChakraProvider>
 	</React.StrictMode>

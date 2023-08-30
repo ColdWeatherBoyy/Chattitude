@@ -11,17 +11,18 @@ import { useState, useEffect } from "react";
 import BrandButton from "../components/BrandButton.jsx";
 import Header from "../components/Header.jsx";
 import { validateToken } from "../utils/auth";
-import { set } from "mongoose";
 
 function UserPage() {
 	// ******************************************************
 	// ****************  User States *******************
 	// ******************************************************
+
 	// User values
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [userId, setUserId] = useState("");
 	const [email, setEmail] = useState("");
+
 	// Input values
 	const [firstNameInput, setFirstNameInput] = useState("");
 	const [lastNameInput, setLastNameInput] = useState("");
@@ -29,6 +30,7 @@ function UserPage() {
 	const [passwordInput, setPasswordInput] = useState("");
 	const [confirmInput, setConfirmInput] = useState("");
 	const [currentPasswordInput, setCurrentPasswordInput] = useState("");
+
 	// Expand section values
 	const [expandFirstNameInput, setExpandFirstNameInput] = useState(false);
 	const [expandLastNameInput, setExpandLastNameInput] = useState(false);
@@ -60,7 +62,6 @@ function UserPage() {
 	const validateAndExtract = async () => {
 		const data = await validateToken();
 		if (data.valid) {
-			setFirstName(data.firstName);
 			setUserId(data.userId);
 		}
 	};

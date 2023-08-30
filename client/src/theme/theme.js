@@ -1,11 +1,12 @@
 import { extendTheme } from "@chakra-ui/react";
 
 const theme = extendTheme({
+	// Makes some fonts available
 	fonts: {
 		heading: "Bitter, Sans-Serif",
 		body: "Lato, Sans-Serif",
 	},
-	// make links not have text decoration and a different hover color
+	// Make links not have text decoration and adds a different hover color
 	components: {
 		Link: {
 			baseStyle: {
@@ -16,6 +17,7 @@ const theme = extendTheme({
 			},
 		},
 	},
+	// Adds some custom colors
 	colors: {
 		brand: {
 			100: "#000000",
