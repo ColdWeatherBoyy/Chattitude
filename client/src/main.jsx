@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import Login from "./pages/Login.jsx";
 import GlobalChat from "./pages/GlobalChat.jsx";
+import UserPage from "./pages/UserPage.jsx";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme/theme.js";
 import "./index.css";
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
 	{
 		path: "/GlobalChat",
 		element: <GlobalChat />,
+	},
+	{
+		path: "/:id",
+		element: <UserPage />,
 	},
 	{
 		path: "*",

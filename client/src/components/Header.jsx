@@ -60,7 +60,7 @@ function Header() {
 				<Box display="flex" flexDirection="row">
 					{!loading && validated ? (
 						<>
-							<Link>
+							<Link as={ReactRouterLink} to={`/${userId}`}>
 								<Text mx={3}>{firstName}</Text>
 							</Link>
 							<Link onClick={() => handleLogout()}>

@@ -45,7 +45,7 @@ const Messages = ({ lastJsonMessage, firstName, messages, setMessages }) => {
 	return (
 		<>
 			<Box
-				minHeight="2rem"
+				maxH="60vh"
 				overflowY="scroll"
 				overflowX="hidden"
 				css={{

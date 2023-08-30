@@ -1,5 +1,5 @@
 import { Box, Heading, FormControl, FormLabel, Input, Text } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "../components/Header.jsx";
 import BrandButton from "../components/BrandButton.jsx";
 
