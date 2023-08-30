@@ -12,10 +12,8 @@ const clients = require("../../server.js");
 // /api/user/get/:id
 router.get("/get/:id", auth, async (req, res) => {
 	try {
-		const authenticatedUser = await User.findById(req.user.data._id);
-
-		if (!authenticatedUser) {
-			return res.status(404).send({ error: "Authenticated user not found." });
+		if (req.user.id !== req.params.id) {
+			return res.status(400).send({ error: "You are not authorized to view this user." });
 		}
 
 		const user = await User.findById(req.params.id);

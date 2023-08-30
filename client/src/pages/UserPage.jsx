@@ -11,10 +11,13 @@ import { useState, useEffect } from "react";
 import BrandButton from "../components/BrandButton.jsx";
 import Header from "../components/Header.jsx";
 import { validateToken } from "../utils/auth";
+import { set } from "mongoose";
 
 function UserPage() {
 	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
 	const [userId, setUserId] = useState("");
+	const [email, setEmail] = useState("");
 
 	const [firstNameInput, setFirstNameInput] = useState("");
 	const [lastNameInput, setLastNameInput] = useState("");
@@ -49,6 +52,19 @@ function UserPage() {
 		};
 		validateAndExtract();
 	}, []);
+
+	useEffect(() => {
+		const fetchUser = async () => {
+			const response = await fetch(`/api/user/get/${userId}`);
+			const data = await response.json();
+			setFirstName(data.first_name);
+			setLastName(data.last_name);
+			setEmail(data.email);
+		};
+		if (userId) {
+			fetchUser();
+		}
+	}, [userId]);
 
 	const updateEmail = (event) => {
 		setEmailInput(event.currentTarget.value);
@@ -159,7 +175,7 @@ function UserPage() {
 					</BrandButton>
 					{expandFirstNameInput && (
 						<Input
-							placeholder="First Name"
+							placeholder={firstName}
 							onChange={updateFirstName}
 							onBlur={updateFirstName}
 							id="firstName"
@@ -173,7 +189,7 @@ function UserPage() {
 					</BrandButton>
 					{expandLastNameInput && (
 						<Input
-							placeholder="Last Name"
+							placeholder={lastName}
 							onChange={updateLastName}
 							onBlur={updateLastName}
 							id="lastName"
@@ -188,7 +204,7 @@ function UserPage() {
 					{expandEmailInput && (
 						<>
 							<Input
-								placeholder="New Email"
+								placeholder={email}
 								onChange={updateEmail}
 								onBlur={updateEmail}
 								isInvalid={invalidEmail}
