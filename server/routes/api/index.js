@@ -1,3 +1,4 @@
+// Central export for all routes
 const router = require("express").Router();
 const userRoutes = require("./UserRoutes");
 const messageRoutes = require("./MessageRoutes");

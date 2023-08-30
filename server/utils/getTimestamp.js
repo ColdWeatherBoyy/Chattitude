@@ -1,4 +1,5 @@
 module.exports = {
+	// Function for getting the current timestamp
 	getTimestamp: function () {
 		const time = new Date();
 		const hours = time.getHours() % 12 || 12;

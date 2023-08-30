@@ -1,24 +1,11 @@
 const router = require("express").Router();
 const { Message } = require("../../models");
 
-// api/message/create
-// create a message
-router.post("/create", async (req, res) => {
-	try {
-		const { content, userId, timestamp } = req.body;
-		const messageData = await Message.create({
-			content,
-			userId,
-			timestamp,
-		});
+// ******************************************************
+// ****************  Message Get Routes *****************
+// ******************************************************
 
-		res.status(200).json(messageData);
-	} catch (err) {
-		res.status(400).json(err);
-	}
-});
-
-// get most recent twenty messages
+// Get most recent twenty messages from DB
 // /api/message/get/mostRecentTwenty
 router.get("/get/mostRecentTwenty", async (req, res) => {
 	try {
@@ -33,7 +20,7 @@ router.get("/get/mostRecentTwenty", async (req, res) => {
 	}
 });
 
-// get the next twenty messages
+// Get the next twenty messages from DB
 // /api/message/get/nextTwentyMessages/:lastMessageId
 router.get("/get/nextTwentyMessages/:lastDisplayedMessageId", async (req, res) => {
 	const { lastDisplayedMessageId } = req.params;
@@ -57,11 +44,32 @@ router.get("/get/nextTwentyMessages/:lastDisplayedMessageId", async (req, res) =
 	}
 });
 
-// get all messages
-// /api/message/get/
-router.get("/get/", async (req, res) => {
+// // Get all messages from DB
+// // /api/message/get/
+// router.get("/get/", async (req, res) => {
+// 	try {
+// 		const messageData = await Message.find({}).populate("userId");
+// 		res.status(200).json(messageData);
+// 	} catch (err) {
+// 		res.status(400).json(err);
+// 	}
+// });
+
+// ******************************************************
+// ****************  Message Post Routes ****************
+// ******************************************************
+
+// Create a message
+// api/message/create
+router.post("/create", async (req, res) => {
 	try {
-		const messageData = await Message.find({}).populate("userId");
+		const { content, userId, timestamp } = req.body;
+		const messageData = await Message.create({
+			content,
+			userId,
+			timestamp,
+		});
+
 		res.status(200).json(messageData);
 	} catch (err) {
 		res.status(400).json(err);

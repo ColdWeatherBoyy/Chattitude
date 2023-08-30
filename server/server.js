@@ -1,4 +1,6 @@
 // Set up server and websocket connection
+
+// Import dependencies
 const path = require("path");
 const express = require("express");
 const { createServer } = require("http");
@@ -37,12 +39,15 @@ wsServer.on("connection", function (connection) {
 	connection.on("close", () => handleDisconnect(connectionId, clients, HOSTPATHFORAPI));
 });
 
+// Express middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "..", "client", "public")));
 
+// Routes
 app.use("/", routes);
 
+// Connect to database and start server
 db.once("open", () => {
 	console.log("DB connection established");
 	server.listen(PORT, () => {

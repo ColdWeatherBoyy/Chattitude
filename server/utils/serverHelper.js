@@ -1,6 +1,5 @@
 const { WebSocket } = require("ws");
 const { getTimestamp } = require("./getTimestamp");
-const uuidv4 = require("uuid").v4;
 
 // Map used to track users
 const users = new Map();
@@ -11,8 +10,12 @@ const chatMessages = [];
 // Variable to track last received message
 let lastReceivedMessage = null;
 
+// ******************************************************
+// ****************  Websocket Functions ****************
+// ******************************************************
+
 // handle message
-async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
+const handleMessage = async (message, connectionId, clients, HOSTPATHFORAPI) => {
 	console.log("Received message: ", message.toString());
 	const dataFromClient = JSON.parse(message.toString());
 	const timestamp = getTimestamp();
@@ -28,6 +31,7 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 	// Update the last received message
 	lastReceivedMessage = dataFromClient;
 
+	// Handle the different types of messages
 	if (dataFromClient.type === "userevent") {
 		const { first_name, userId } = dataFromClient;
 		users.set(userId, { first_name });
@@ -44,10 +48,12 @@ async function handleMessage(message, connectionId, clients, HOSTPATHFORAPI) {
 
 	const json = { chatMessages };
 
+	// Broadcast the json message to all clients
 	broadcastMessage(json, clients);
-}
+};
 
-function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
+// handle disconnect of a client
+const handleDisconnect = (connectionId, clients, HOSTPATHFORAPI) => {
 	const userId = connections.get(connectionId);
 	if (!userId) {
 		return;
@@ -78,10 +84,10 @@ function handleDisconnect(connectionId, clients, HOSTPATHFORAPI) {
 	saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI);
 	const json = { chatMessages };
 	broadcastMessage(json, clients);
-}
+};
 
 // broadcast message to all connected clients
-function broadcastMessage(json, clients) {
+const broadcastMessage = (json, clients) => {
 	const usersNamesArr = Array.from(users.values());
 	json.users = usersNamesArr.map((user) => user.first_name);
 
@@ -94,9 +100,10 @@ function broadcastMessage(json, clients) {
 			client.send(data);
 		}
 	}
-}
+};
 
-async function saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI) {
+// save message in database
+const saveMessageInDb = async (content, userId, timestamp, HOSTPATHFORAPI) => {
 	// generate the right path to the api endpoint
 	const url = `${HOSTPATHFORAPI}/api/message/create`;
 	try {
@@ -112,6 +119,6 @@ async function saveMessageInDb(content, userId, timestamp, HOSTPATHFORAPI) {
 	} catch (err) {
 		console.error(err);
 	}
-}
+};
 
 module.exports = { broadcastMessage, handleMessage, handleDisconnect };
