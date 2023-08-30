@@ -154,122 +154,131 @@ function UserPage() {
 			alignItems="center"
 		>
 			<Header />
-			<Heading>{firstName}'s Profile</Heading>
-			<Text>Update your account details below</Text>
-			<FormControl
-				bgColor="white"
-				w="50%"
-				p={5}
-				m={5}
-				borderRadius={5}
-				onKeyUp={(event) => {
-					if (event.key === "Enter") update();
-				}}
+			<Box
+				width="50%"
+				display="flex"
+				flexDirection="column"
+				alignItems="center"
+				my={20}
+				gap={6}
 			>
-				<Flex direction="column" gap={2}>
-					<BrandButton
-						width="fit-content"
-						onClick={() => setExpandFirstNameInput(!expandFirstNameInput)}
-					>
-						Update First Name
-					</BrandButton>
-					{expandFirstNameInput && (
-						<Input
-							placeholder={firstName}
-							onChange={updateFirstName}
-							onBlur={updateFirstName}
-							id="firstName"
-						/>
-					)}
-					<BrandButton
-						width="fit-content"
-						onClick={() => setExpandLastNameInput(!expandLastNameInput)}
-					>
-						Update Last Name
-					</BrandButton>
-					{expandLastNameInput && (
-						<Input
-							placeholder={lastName}
-							onChange={updateLastName}
-							onBlur={updateLastName}
-							id="lastName"
-						/>
-					)}
-					<BrandButton
-						width="fit-content"
-						onClick={() => setExpandEmailInput(!expandEmailInput)}
-					>
-						Update Email
-					</BrandButton>
-					{expandEmailInput && (
-						<>
+				<Heading>{firstName}'s Profile</Heading>
+				<Text>Update your account details below</Text>
+				<FormControl
+					bgColor="white"
+					w="80%"
+					p={5}
+					m={5}
+					borderRadius={5}
+					onKeyUp={(event) => {
+						if (event.key === "Enter") update();
+					}}
+				>
+					<Flex direction="column" gap={2}>
+						<BrandButton
+							width="fit-content"
+							onClick={() => setExpandFirstNameInput(!expandFirstNameInput)}
+						>
+							Update First Name
+						</BrandButton>
+						{expandFirstNameInput && (
 							<Input
-								placeholder={email}
-								onChange={updateEmail}
-								onBlur={updateEmail}
-								isInvalid={invalidEmail}
-								id="email"
+								placeholder={firstName}
+								onChange={updateFirstName}
+								onBlur={updateFirstName}
+								id="firstName"
 							/>
-							<Text my={0} py={0} color="red.600">
-								{invalidEmailMessage}
-							</Text>
-						</>
-					)}
-					<BrandButton
-						width="fit-content"
-						onClick={() => setExpandPasswordInputs(!expandPasswordInputs)}
-					>
-						Update Password
-					</BrandButton>
-					{expandPasswordInputs && (
-						<>
-							<FormLabel fontSize="sm" ml={4} my={0} py={0}>
-								New Password
-							</FormLabel>
+						)}
+						<BrandButton
+							width="fit-content"
+							onClick={() => setExpandLastNameInput(!expandLastNameInput)}
+						>
+							Update Last Name
+						</BrandButton>
+						{expandLastNameInput && (
 							<Input
-								type="password"
-								placeholder="New Password"
-								onChange={updatePassword}
-								onBlur={updatePassword}
-								id="password"
+								placeholder={lastName}
+								onChange={updateLastName}
+								onBlur={updateLastName}
+								id="lastName"
 							/>
-							<FormLabel fontSize="sm" ml={4} my={0} py={0}>
-								Confirm New Password
-							</FormLabel>
-							<Input
-								type="password"
-								placeholder="Confirm New Password"
-								onChange={updateConfirm}
-								onBlur={updateConfirm}
-								id="confirm"
-							/>
-							{confirmMessage || matchMessage ? (
+						)}
+						<BrandButton
+							width="fit-content"
+							onClick={() => setExpandEmailInput(!expandEmailInput)}
+						>
+							Update Email
+						</BrandButton>
+						{expandEmailInput && (
+							<>
+								<Input
+									placeholder={email}
+									onChange={updateEmail}
+									onBlur={updateEmail}
+									isInvalid={invalidEmail}
+									id="email"
+								/>
 								<Text my={0} py={0} color="red.600">
-									{confirmMessage} {matchMessage}
+									{invalidEmailMessage}
 								</Text>
-							) : (
-								<> </>
-							)}
-							<FormLabel fontSize="sm" ml={4} my={0} py={0}>
-								Current Password
-							</FormLabel>
-							<Input
-								type="password"
-								placeholder="Current Password"
-								onChange={updateCurrentPassword}
-								onBlur={updateCurrentPassword}
-								id="currentPassword"
-							/>
-							<Text my={0} py={0} color="red.600">
-								{currentPasswordMessage}
-							</Text>
-						</>
-					)}
-				</Flex>
-			</FormControl>
-			<BrandButton mb={3} onClick={update}>
-				Update
-			</BrandButton>
+							</>
+						)}
+						<BrandButton
+							width="fit-content"
+							onClick={() => setExpandPasswordInputs(!expandPasswordInputs)}
+						>
+							Update Password
+						</BrandButton>
+						{expandPasswordInputs && (
+							<>
+								<FormLabel fontSize="sm" ml={4} my={0} py={0}>
+									New Password
+								</FormLabel>
+								<Input
+									type="password"
+									placeholder="New Password"
+									onChange={updatePassword}
+									onBlur={updatePassword}
+									id="password"
+								/>
+								<FormLabel fontSize="sm" ml={4} my={0} py={0}>
+									Confirm New Password
+								</FormLabel>
+								<Input
+									type="password"
+									placeholder="Confirm New Password"
+									onChange={updateConfirm}
+									onBlur={updateConfirm}
+									id="confirm"
+								/>
+								{confirmMessage || matchMessage ? (
+									<Text my={0} py={0} color="red.600">
+										{confirmMessage} {matchMessage}
+									</Text>
+								) : (
+									<> </>
+								)}
+								<FormLabel fontSize="sm" ml={4} my={0} py={0}>
+									Current Password
+								</FormLabel>
+								<Input
+									type="password"
+									placeholder="Current Password"
+									onChange={updateCurrentPassword}
+									onBlur={updateCurrentPassword}
+									id="currentPassword"
+								/>
+								<Text my={0} py={0} color="red.600">
+									{currentPasswordMessage}
+								</Text>
+							</>
+						)}
+					</Flex>
+				</FormControl>
+				<BrandButton mb={3} onClick={update}>
+					Update
+				</BrandButton>
+			</Box>
 		</Box>
 	);
 }
