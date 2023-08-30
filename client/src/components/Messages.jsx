@@ -1,72 +1,25 @@
 import { Box, Text, Flex } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
+import { getMoreMessages } from "../utils/messageHelpers";
 import Loader from "./Loader";
 
-const Messages = ({ lastJsonMessage, firstName }) => {
-	const [messages, setMessages] = useState([]);
+const Messages = ({ lastJsonMessage, firstName, messages, setMessages }) => {
 	const [loadMoreState, setLoadMoreState] = useState(false);
 	const scrollableRef = useRef();
 
-	// functions to get Messages from the database
-
-	// get the most recent twenty messages from the database
-	async function getMessages() {
-		try {
-			// get the last twent messages from the database
-			const mostRecentTwentyMessages = await fetch("/api/message/get/mostRecentTwenty", {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			if (!mostRecentTwentyMessages.ok)
-				throw new Error("Error getting last hour of chat");
-			const data = await mostRecentTwentyMessages.json();
-			return data;
-		} catch (err) {
-			console.log(err);
-		}
-	}
-
-	// get the next twenty messages from the database
-	async function getMoreMessages() {
-		try {
-			// get the message Id for the last message in the chat box
-			const lastMessageId = messages[0]._id;
-			// get the next twenty messages from the database, given the last message
-			const nextTwentyMessages = await fetch(
-				`/api/message/get/nextTwentyMessages/${lastMessageId}`,
-				{
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
-			if (!nextTwentyMessages.ok) throw new Error("Error getting next twenty messages");
-			const data = await nextTwentyMessages.json();
-			// update state with the new messages
-			setMessages((messages) => [...data, ...messages]);
-		} catch (err) {
-			console.log(err);
-		}
-	}
-
+	// Handles getting more messages from the db for the chat box
 	const handleGetMoreMessages = () => {
 		// set load more state for scrolling
 		setLoadMoreState(true);
 		// delay the call
 		setTimeout(() => {
-			getMoreMessages();
+			getMoreMessages(messages, setMessages);
 		}, 500);
 	};
 
-	// determine where to get message data from
-	async function fetchData() {
-		if (!lastJsonMessage || lastJsonMessage.chatMessages.length === 0) {
-			const data = await getMessages();
-			setMessages(data);
-		} else {
+	// Render new message to page
+	async function renderNewMessage() {
+		if (lastJsonMessage) {
 			setMessages((messages) => [
 				...messages,
 				lastJsonMessage.chatMessages[lastJsonMessage.chatMessages.length - 1],
@@ -76,7 +29,7 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 
 	// get messages on mount and when a new message is sent
 	useEffect(() => {
-		fetchData();
+		renderNewMessage();
 	}, [lastJsonMessage]);
 
 	// scroll to the bottom of the chat box on mount and when a new message is sent, if the user has not clicked load more
@@ -94,6 +47,23 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 			<Box
 				minHeight="2rem"
 				overflowY="scroll"
+				overflowX="hidden"
+				css={{
+					"&::-webkit-scrollbar": {
+						width: 10,
+					},
+					"&::-webkit-scrollbar-track": {
+						backgroundColor: "transparent",
+					},
+					"&::-webkit-scrollbar-thumb": {
+						borderRadius: 8,
+						border: "none",
+						background: "#aaa",
+					},
+					"&::-webkit-scrollbar-thumb:hover": {
+						background: "#999",
+					},
+				}}
 				ref={scrollableRef}
 				display="flex"
 				flexDirection="column"
@@ -103,9 +73,6 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 				boxShadow="inner"
 				borderRadius={8}
 				bg="gray.200"
-				css={{
-					scrollbarGutter: "none",
-				}}
 			>
 				{loadMoreState ? (
 					<Flex
@@ -139,12 +106,16 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 						let userName;
 						// break content apart by : to style separately
 						if (content.includes(":")) {
-							[userName, messageContent] = content.split(":");
+							const firstColonIndex = content.indexOf(":");
+
+							userName = content.slice(0, firstColonIndex);
+							messageContent = content.slice(firstColonIndex + 1);
 							type = "chatevent";
 						} else {
 							type = "userevent";
 							messageContent = content;
 						}
+
 						return (
 							<Flex
 								key={`message${index}`}
@@ -158,7 +129,7 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 								color="black"
 								borderRadius={8}
 								px={4}
-								py={4}
+								py={3}
 								boxShadow="sm"
 							>
 								{type === "chatevent" ? (
@@ -171,7 +142,12 @@ const Messages = ({ lastJsonMessage, firstName }) => {
 											>
 												{userName}:
 											</Text>
-											<Text fontSize="md" px={8} wordBreak="break-word">
+											<Text
+												fontSize="md"
+												px={4}
+												wordBreak="break-word"
+												whiteSpace="pre-wrap"
+											>
 												{messageContent}
 											</Text>
 										</Flex>

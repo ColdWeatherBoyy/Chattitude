@@ -1,55 +1,68 @@
 import { useEffect, useState, useRef } from "react";
 import useWebSocket from "react-use-websocket";
-import { Box, Textarea, Flex, Heading } from "@chakra-ui/react";
+import {
+	Box,
+	Flex,
+	Heading,
+	Drawer,
+	DrawerOverlay,
+	DrawerHeader,
+	DrawerBody,
+	DrawerContent,
+	useDisclosure,
+} from "@chakra-ui/react";
 import Messages from "../components/Messages";
 import Header from "../components/Header";
+import BrandButton from "../components/BrandButton";
+import AutoResizeTextarea from "../components/ResizeTextarea";
 import { validateToken } from "../utils/auth";
+import { getMessages } from "../utils/messageHelpers";
 
 const WS_URL = "ws://127.0.0.1:3001";
 
 const GlobalChat = () => {
 	// State declarations
+	const [textareaInputValue, setTextareaInputValue] = useState("");
 	const [firstName, setFirstName] = useState("");
 	const [userId, setUserId] = useState("");
-	const [chatMessage, setChatMessage] = useState("");
+	const [messages, setMessages] = useState([]);
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
+	const [connectedUsers, setConnectedUsers] = useState([]);
+	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	// useRef declarations
 	const chatTextarea = useRef(null);
 
 	// WebSocket Hook declarations
 	const { sendJsonMessage, readyState, lastJsonMessage } = useWebSocket(WS_URL, {
-		onOpen: () => {
-			console.log("WebSocket connection established");
-		},
-		onClose: () => {
-			console.log("WebSocket connection closed");
-		},
-		// Will attempt to reconnect on all close events, such as server shutting down
+		onOpen: () => console.log("WebSocket connection opened"),
+		onClose: () => console.log("WebSocket connection closed"),
 		share: true,
 		retryOnError: true,
-		shouldReconnect: () => true,
+		// set reconnect logic to attempt reconnect once every 3 seconds if connection fails, and is not intentional by the client
+		shouldReconnect: (closeEvent) => {
+			if (closeEvent.code === 1000) {
+				return false;
+			}
+			console.log("WebSocket connection failed, retrying in 3 seconds");
+			return true;
+		},
 	});
 
-	// Helper Functions
-
-	// Event Handlers
-	const handleTextareaValueChange = () => {
-		// Update height of textarea
-		chatTextarea.current.style.height = "auto";
-		chatTextarea.current.style.height = `${chatTextarea.current.scrollHeight}px`;
-		// Update chatMessage state
-		setChatMessage(chatTextarea.current.value);
-	};
+	useEffect(() => {
+		if (lastJsonMessage) {
+			setConnectedUsers(lastJsonMessage.users);
+		}
+	}, [lastJsonMessage]);
 
 	// Send message to server
 	const handleSendMessage = () => {
 		if (readyState !== 1) {
 			console.log("WebSocket not connected");
-		} else if (!chatMessage) {
+		} else if (!textareaInputValue) {
 			console.log("No message to send");
 		} else {
-			const content = chatMessage;
+			const content = textareaInputValue;
 			sendJsonMessage({
 				first_name: firstName,
 				userId: userId,
@@ -57,7 +70,7 @@ const GlobalChat = () => {
 				type: "chatevent",
 			});
 
-			setChatMessage("");
+			setTextareaInputValue("");
 		}
 	};
 
@@ -77,6 +90,10 @@ const GlobalChat = () => {
 			const { firstName, userId } = await validateToken();
 			setFirstName(firstName);
 			setUserId(userId);
+
+			const data = await getMessages();
+			setMessages(data);
+
 			sendJsonMessage({
 				first_name: firstName,
 				userId: userId,
@@ -84,8 +101,14 @@ const GlobalChat = () => {
 				type: "userevent",
 			});
 		};
-		validateAndExtract();
-	}, []);
+
+		// Check WebSocket connection state before sending the message
+		if (readyState === 1) {
+			validateAndExtract();
+		} else {
+			console.log("WebSocket not connected");
+		}
+	}, [readyState]);
 
 	return (
 		<Box
@@ -98,6 +121,30 @@ const GlobalChat = () => {
 		>
 			<Header />
 			<Heading my={5}>Chat</Heading>
+			<BrandButton onClick={onOpen}>Online Users</BrandButton>
+			<Drawer isOpen={isOpen} placement="left" onClose={onClose}>
+				<DrawerOverlay />
+				<DrawerContent>
+					<DrawerHeader>
+						<Flex alignItems="center" justifyContent="space-between">
+							<Heading as="h3" size="md">
+								Online Users
+							</Heading>
+							<Box ml={5} fontSize="md" onClick={onClose} cursor="pointer">
+								X
+							</Box>
+						</Flex>
+					</DrawerHeader>
+					<DrawerBody>
+						{connectedUsers.map((user) => (
+							<Flex key={user} alignItems="center">
+								<Box w="10px" h="10px" borderRadius="50%" bgColor="green.400" mr={2} />
+								{user}
+							</Flex>
+						))}
+					</DrawerBody>
+				</DrawerContent>
+			</Drawer>
 			<Flex
 				bgColor="white"
 				w="90%"
@@ -110,12 +157,17 @@ const GlobalChat = () => {
 				justifyContent="space-between"
 				boxShadow="xl"
 			>
-				<Messages lastJsonMessage={lastJsonMessage} firstName={firstName} />
+				<Messages
+					lastJsonMessage={lastJsonMessage}
+					firstName={firstName}
+					messages={messages}
+					setMessages={setMessages}
+				/>
 				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
-					<Textarea
+					<AutoResizeTextarea
 						ref={chatTextarea}
-						onInput={handleTextareaValueChange}
-						value={chatMessage}
+						textareaInputValue={textareaInputValue}
+						setTextareaInputValue={setTextareaInputValue}
 						onKeyDown={(event) => {
 							if (event.key === "Enter" && !event.shiftKey) {
 								event.preventDefault();
@@ -139,6 +191,22 @@ const GlobalChat = () => {
 						}}
 						_hover={{
 							boxShadow: "none",
+						}}
+						css={{
+							"&::-webkit-scrollbar": {
+								width: 8,
+							},
+							"&::-webkit-scrollbar-track": {
+								backgroundColor: "transparent",
+							},
+							"&::-webkit-scrollbar-thumb": {
+								borderRadius: 8,
+								border: "none",
+								background: "#aaa",
+							},
+							"&::-webkit-scrollbar-thumb:hover": {
+								background: "#999",
+							},
 						}}
 					/>
 					<Box
