@@ -6,10 +6,12 @@ export const validateToken = async () => {
 				"Content-Type": "application/json",
 			},
 		});
+
 		if (!response.ok) throw new Error("Invalid token");
 		const data = await response.json();
 		const { first_name: firstName, _id: userId } = data.user;
-		return { firstName, userId };
+		const valid = true;
+		return { firstName, userId, valid };
 	} catch (error) {
 		console.error(error);
 		// redirect to login page
