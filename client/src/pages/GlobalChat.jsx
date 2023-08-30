@@ -113,7 +113,8 @@ const GlobalChat = () => {
 	return (
 		<Box
 			w="100vw"
-			h="100vh"
+			h="100%"
+			minH="100vh"
 			bgColor="gray.200"
 			display="flex"
 			flexDirection="column"

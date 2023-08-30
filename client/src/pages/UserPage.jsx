@@ -155,7 +155,7 @@ function UserPage() {
 		>
 			<Header />
 			<Box
-				width="50%"
+				width="60%"
 				display="flex"
 				flexDirection="column"
 				alignItems="center"
@@ -166,7 +166,7 @@ function UserPage() {
 				<Text>Update your account details below</Text>
 				<FormControl
 					bgColor="white"
-					w="80%"
+					w="100%"
 					p={5}
 					m={5}
 					borderRadius={5}
