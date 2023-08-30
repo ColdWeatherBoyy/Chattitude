@@ -4,6 +4,9 @@ import Header from "../components/Header.jsx";
 import BrandButton from "../components/BrandButton.jsx";
 
 function SignUp() {
+	// ******************************************************
+	// ****************  SignUp States **********************
+	// ******************************************************
 	const [firstNameInput, setFirstNameInput] = useState("");
 	const [lastNameInput, setLastNameInput] = useState("");
 	const [emailInput, setEmailInput] = useState("");
@@ -17,6 +20,9 @@ function SignUp() {
 	const [firstNameError, setFirstNameError] = useState(false);
 	const [lastNameError, setLastNameError] = useState(false);
 
+	// ******************************************************
+	// *************  Conditional Error Values **************
+	// ******************************************************
 	let emailMessage = emailError ? "Email is required" : "";
 	let invalidEmailMessage = invalidEmail ? "Entered value is not a valid email" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
@@ -25,9 +31,15 @@ function SignUp() {
 	let firstNameMessage = firstNameError ? "First name is required" : "";
 	let lastNameMessage = lastNameError ? "Last name is required" : "";
 
+	// Email Regex Pattern
 	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-	async function fetchData() {
+	// ******************************************************
+	// ****************  SignUp Functions *******************
+	// ******************************************************
+
+	// Fetch function to send sin up data to server
+	const createAccount = async () => {
 		try {
 			const response = await fetch("/api/user/post/create", {
 				method: "POST",
@@ -56,9 +68,10 @@ function SignUp() {
 		} catch (error) {
 			console.log("catch-block error: ", error);
 		}
-	}
+	};
 
-	const signUp = async () => {
+	// Function to handle sign up
+	const handleSignUp = async () => {
 		const emailInputErrorCheck = emailInput.trim() === "";
 		const invalidEmailCheck = !emailPattern.test(emailInput);
 		const passwordInputErrorCheck = passwordInput.trim() === "";
@@ -86,26 +99,23 @@ function SignUp() {
 			!passwordMatchErrorCheck &&
 			!invalidEmailCheck
 		) {
-			await fetchData();
+			await createAccount();
 		}
 	};
 
+	// Functions to update user account states
 	const updateEmail = (event) => {
 		setEmailInput(event.currentTarget.value);
 	};
-
 	const updatePassword = (event) => {
 		setPasswordInput(event.currentTarget.value);
 	};
-
 	const updateConfirm = (event) => {
 		setConfirmInput(event.currentTarget.value);
 	};
-
 	const updateFirstName = (event) => {
 		setFirstNameInput(event.currentTarget.value);
 	};
-
 	const updateLastName = (event) => {
 		setLastNameInput(event.currentTarget.value);
 	};
@@ -129,7 +139,7 @@ function SignUp() {
 					m={5}
 					borderRadius={5}
 					onKeyUp={(event) => {
-						if (event.key === "Enter") signUp();
+						if (event.key === "Enter") handleSignUp();
 					}}
 				>
 					<FormLabel>First Name</FormLabel>
@@ -140,6 +150,7 @@ function SignUp() {
 						isInvalid={firstNameError}
 						id="firstName"
 					/>
+					{/* Error messages for first name */}
 					<Text pb={3} color="red.600">
 						{firstNameMessage}
 					</Text>
@@ -151,6 +162,7 @@ function SignUp() {
 						isInvalid={lastNameError}
 						id="lastName"
 					/>
+					{/* Error messages for last name */}
 					<Text pb={3} color="red.600">
 						{lastNameMessage}
 					</Text>
@@ -162,6 +174,7 @@ function SignUp() {
 						isInvalid={emailError || invalidEmail}
 						id="email"
 					/>
+					{/* Error messages for email */}
 					<Text pb={3} color="red.600">
 						{emailMessage} {invalidEmailMessage}
 					</Text>
@@ -174,6 +187,7 @@ function SignUp() {
 						isInvalid={passwordError}
 						id="password"
 					/>
+					{/* Error messages for password */}
 					<Text pb={3} color="red.600">
 						{passwordMessage}
 					</Text>
@@ -186,11 +200,12 @@ function SignUp() {
 						isInvalid={confirmError || matchError}
 						id="passwordConfirm"
 					/>
+					{/* Error messages for confirmation password */}
 					<Text pb={3} color="red.600">
 						{confirmMessage} {matchMessage}
 					</Text>
 				</FormControl>
-				<BrandButton onClick={signUp}>Sign Up</BrandButton>
+				<BrandButton onClick={handleSignUp}>Sign Up</BrandButton>
 			</Box>
 		</>
 	);

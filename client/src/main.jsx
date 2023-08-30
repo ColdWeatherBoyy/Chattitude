@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App.jsx";
 import SignUp from "./pages/SignUp.jsx";
-import Login from "./pages/Login.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
 import GlobalChat from "./pages/GlobalChat.jsx";
 import UserPage from "./pages/UserPage.jsx";
 import { ChakraProvider } from "@chakra-ui/react";
@@ -18,7 +18,7 @@ const router = createBrowserRouter([
 	},
 	{
 		path: "/login",
-		element: <Login />,
+		element: <LoginPage />,
 	},
 	{
 		path: "/signup",
