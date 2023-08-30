@@ -140,8 +140,8 @@ router.post("/post/login", async (req, res) => {
 // **************************
 
 // Update User name, email, or password, usable route for all three separate update functions.
-// /api/user/put/
-router.put("/put/", auth, async (req, res) => {
+// /api/user/put/:id
+router.put("/put/:id", auth, async (req, res) => {
 	try {
 		const {
 			newFirstName,
@@ -152,14 +152,20 @@ router.put("/put/", auth, async (req, res) => {
 			existingPassword,
 		} = req.body;
 
+		const userId = req.params.id;
+
+		// Make sure auth user is the same as user being updated
+		if (req.user.id !== req.params.id) {
+			return res
+				.status(400)
+				.send({ error: "You are not authorized to update this user." });
+		}
+
 		// Checks to make sure at least one field is being updated
 		// add a check that at least one designated field is being updated
 		if (!newFirstName && !newLastName && !newEmail && !newPassword) {
 			return res.status(400).send("No updates provided.");
 		}
-
-		// Grabs user ID from auth req.user.data
-		const userId = req.user.data._id;
 
 		// Finds user by ID to check other user values and ensure user exists
 		let userQuery = User.findById(userId).select("-password");

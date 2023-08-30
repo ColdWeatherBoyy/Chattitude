@@ -75,9 +75,11 @@ function UserPage() {
 	};
 
 	const update = async () => {
-		const invalidEmailCheck = !emailPattern.test(emailInput);
-		const confirmInputErrorCheck = confirmInput.trim() === "";
-		const currentPasswordInputErrorCheck = currentPasswordInput.trim() === "";
+		const invalidEmailCheck = emailInput ? !emailPattern.test(emailInput) : false;
+		const confirmInputErrorCheck = passwordInput ? confirmInput.trim() === "" : false;
+		const currentPasswordInputErrorCheck = passwordInput
+			? currentPasswordInput.trim() === ""
+			: false;
 		const passwordMatchErrorCheck =
 			passwordInput.trim() !== confirmInput.trim() && confirmInput.trim() !== "";
 		setConfirmError(confirmInputErrorCheck);
@@ -85,28 +87,51 @@ function UserPage() {
 		setInvalidEmail(invalidEmailCheck);
 		setCurrentPasswordError(currentPasswordInputErrorCheck);
 
-		// implement call to update depending on which fields are filled in
 		const updateData = {};
 		if (firstNameInput !== "") {
-			updateData.firstName = firstNameInput;
+			updateData.newFirstName = firstNameInput;
 		}
 		if (lastNameInput !== "") {
-			updateData.lastName = lastNameInput;
+			updateData.newLastName = lastNameInput;
 		}
 		if (emailInput !== "") {
-			updateData.email = emailInput;
+			updateData.newEmail = emailInput;
 		}
 		if (passwordInput !== "" && confirmInput !== "" && currentPasswordInput !== "") {
-			updateData.password = passwordInput;
-			updateData.confirm = confirmInput;
-			updateData.currentPassword = currentPasswordInput;
+			updateData.newPassword = passwordInput;
+			updateData.confirmationNewPassword = confirmInput;
+			updateData.existingPassword = currentPasswordInput;
+		}
+
+		if (
+			!updateData.newFirstName &&
+			!updateData.newLastName &&
+			!updateData.newEmail &&
+			!updateData.newPassword &&
+			!updateData.confirmationNewPassword &&
+			!updateData.existingPassword
+		) {
+			alert("No changes made");
+		} else {
+			// fetch request for updating user data
+			const response = await fetch(`/api/user/put/${userId}`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(updateData),
+			});
+			if (response.ok) {
+				window.location.href = `/${userId}`;
+			}
 		}
 	};
 
 	return (
 		<Box
 			w="100vw"
-			h="100vh"
+			h="100%"
+			minH="100vh"
 			bgColor="gray.200"
 			display="flex"
 			flexDirection="column"
@@ -125,7 +150,7 @@ function UserPage() {
 					if (event.key === "Enter") update();
 				}}
 			>
-				<Flex direction="column" gap={4}>
+				<Flex direction="column" gap={2}>
 					<BrandButton
 						width="fit-content"
 						onClick={() => setExpandFirstNameInput(!expandFirstNameInput)}
@@ -169,7 +194,7 @@ function UserPage() {
 								isInvalid={invalidEmail}
 								id="email"
 							/>
-							<Text pb={3} my={0} py={0} color="red.600">
+							<Text my={0} py={0} color="red.600">
 								{invalidEmailMessage}
 							</Text>
 						</>
@@ -182,7 +207,7 @@ function UserPage() {
 					</BrandButton>
 					{expandPasswordInputs && (
 						<>
-							<FormLabel fontSize="sm" ml={4} my={0}>
+							<FormLabel fontSize="sm" ml={4} my={0} py={0}>
 								New Password
 							</FormLabel>
 							<Input
@@ -192,7 +217,7 @@ function UserPage() {
 								onBlur={updatePassword}
 								id="password"
 							/>
-							<FormLabel fontSize="sm" ml={4} my={0}>
+							<FormLabel fontSize="sm" ml={4} my={0} py={0}>
 								Confirm New Password
 							</FormLabel>
 							<Input
@@ -202,10 +227,14 @@ function UserPage() {
 								onBlur={updateConfirm}
 								id="confirm"
 							/>
-							<Text pb={3} my={0} py={0} color="red.600">
-								{confirmMessage} {matchMessage}
-							</Text>
-							<FormLabel fontSize="sm" ml={4} my={0}>
+							{confirmMessage || matchMessage ? (
+								<Text my={0} py={0} color="red.600">
+									{confirmMessage} {matchMessage}
+								</Text>
+							) : (
+								<> </>
+							)}
+							<FormLabel fontSize="sm" ml={4} my={0} py={0}>
 								Current Password
 							</FormLabel>
 							<Input
@@ -215,13 +244,16 @@ function UserPage() {
 								onBlur={updateCurrentPassword}
 								id="currentPassword"
 							/>
-							<Text pb={3} my={0} py={0} color="red.600">
+							<Text my={0} py={0} color="red.600">
 								{currentPasswordMessage}
 							</Text>
 						</>
 					)}
 				</Flex>
 			</FormControl>
+			<BrandButton mb={3} onClick={update}>
+				Update
+			</BrandButton>
 		</Box>
 	);
 }
