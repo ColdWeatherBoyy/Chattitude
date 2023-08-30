@@ -10,13 +10,12 @@ function SignUp() {
 	const [passwordInput, setPasswordInput] = useState("");
 	const [confirmInput, setConfirmInput] = useState("");
 	const [emailError, setEmailError] = useState(false);
-	const [invalidEmail, setInvalidEmail] = useState(false); // TODO: implement email validation
+	const [invalidEmail, setInvalidEmail] = useState(false);
 	const [passwordError, setPasswordError] = useState(false);
 	const [confirmError, setConfirmError] = useState(false);
 	const [matchError, setMatchError] = useState(false);
 	const [firstNameError, setFirstNameError] = useState(false);
 	const [lastNameError, setLastNameError] = useState(false);
-	const [makeFetch, setMakeFetch] = useState(false);
 
 	let emailMessage = emailError ? "Email is required" : "";
 	let invalidEmailMessage = invalidEmail ? "Entered value is not a valid email" : "";
@@ -42,30 +41,24 @@ function SignUp() {
 					password: passwordInput,
 				}),
 			});
-			console.log(response);
 			if (response.ok) {
 				window.location.href = "/globalchat";
 			} else {
 				const errorData = await response.json();
-				console.log(errorData.error.errors);
-				const errorArray = Object.entries(errorData.error.errors).map(([error]) => {
-					return `${error.message}`;
-				});
-				alert(errorArray.join("\n"));
+				if (errorData.error.code === 11000) {
+					alert("Email is already associated with an active account.");
+				} else if (errorData.error.name === "ValidationError") {
+					alert(
+						"Password must be at least 8 characters long and contain one lowercase letter, one uppercase letter, one number, and one special character."
+					);
+				}
 			}
 		} catch (error) {
-			console.log(error);
+			console.log("catch-block error: ", error);
 		}
 	}
 
 	const signUp = async () => {
-		console.log("sign in attempt");
-		console.log("First Name: " + firstNameInput);
-		console.log("Last Name: " + lastNameInput);
-		console.log("Email: " + emailInput);
-		console.log("Password: " + passwordInput);
-		console.log("Password Confirmation: " + confirmInput);
-
 		const emailInputErrorCheck = emailInput.trim() === "";
 		const invalidEmailCheck = !emailPattern.test(emailInput);
 		const passwordInputErrorCheck = passwordInput.trim() === "";
@@ -84,7 +77,6 @@ function SignUp() {
 		if (!emailInputErrorCheck) {
 			setInvalidEmail(invalidEmailCheck);
 		}
-
 		if (
 			!emailInputErrorCheck &&
 			!passwordInputErrorCheck &&
@@ -94,16 +86,9 @@ function SignUp() {
 			!passwordMatchErrorCheck &&
 			!invalidEmailCheck
 		) {
-			setMakeFetch(true);
+			await fetchData();
 		}
 	};
-
-	useEffect(() => {
-		if (makeFetch) {
-			fetchData();
-			setMakeFetch(false);
-		}
-	}, [makeFetch]);
 
 	const updateEmail = (event) => {
 		setEmailInput(event.currentTarget.value);

@@ -90,7 +90,7 @@ router.post("/post/create", async (req, res) => {
 		const { first_name, last_name, email, password } = req.body;
 
 		const user = await User.create({ first_name, last_name, email, password });
-		console.log(user);
+		console.log("user", user);
 		// add JWT here
 		const token = signToken(user);
 
@@ -101,6 +101,7 @@ router.post("/post/create", async (req, res) => {
 			.status(200)
 			.json({ message: `Account for ${first_name} ${last_name} created!`, user });
 	} catch (err) {
+		console.log("error", err);
 		res.status(400).json({ error: err });
 	}
 });
@@ -120,7 +121,7 @@ router.post("/post/login", async (req, res) => {
 		const verified = await user.isCorrectPassword(password);
 
 		if (!verified) {
-			return res.status(400).send({ error: "Password does not match." });
+			return res.status(400).send({ error: "Password is incorrect, please try again." });
 		}
 
 		// add JWT here
