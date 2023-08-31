@@ -70,7 +70,6 @@ router.get("/validate/", auth, async (req, res) => {
 // User create route
 // /api/user/post/create
 router.post("/post/create", async (req, res) => {
-	console.log(req.body);
 	try {
 		const { first_name, last_name, email, password } = req.body;
 
@@ -241,24 +240,29 @@ router.put("/put/:id", auth, async (req, res) => {
 
 // Delete User by ID route
 // Requires UI to ask user to retype email address to confirm deletion
-// /api/user/delete/
-router.delete("/delete", auth, async (req, res) => {
+// /api/user/delete/:id
+router.delete("/delete/:id", auth, async (req, res) => {
 	try {
-		const { confirmationPassword } = req.body;
+		const { email, password } = req.body;
 
-		const user = await User.findById(req.user.data._id);
+		console.log(email, password);
+
+		const user = await User.findById(req.params.id);
 
 		if (!user) {
 			return res.status(404).send({ error: "User not found." });
 		}
 
-		const verification = await user.isCorrectPassword(confirmationPassword);
-
+		const verification = await user.isCorrectPassword(password);
 		if (!verification) {
 			return res.status(400).send({ error: "Password does not match user record." });
 		}
 
-		const deletedUser = await User.findByIdAndDelete(req.user.data._id);
+		if (email !== user.email) {
+			return res.status(400).send({ error: "Email does not match user record." });
+		}
+
+		const deletedUser = await User.findByIdAndDelete(req.params.id);
 		res.status(200).json({
 			message: `Account for ${deletedUser.first_name} ${deletedUser.last_name} deleted!`,
 		});

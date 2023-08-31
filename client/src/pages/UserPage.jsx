@@ -6,6 +6,11 @@ import {
 	FormLabel,
 	Input,
 	Text,
+	Tabs,
+	TabList,
+	TabPanels,
+	Tab,
+	TabPanel,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import BrandButton from "../components/BrandButton.jsx";
@@ -30,6 +35,8 @@ function UserPage() {
 	const [passwordInput, setPasswordInput] = useState("");
 	const [confirmInput, setConfirmInput] = useState("");
 	const [currentPasswordInput, setCurrentPasswordInput] = useState("");
+	const [deleteEmail, setDeleteEmail] = useState("");
+	const [deletePassword, setDeletePassword] = useState("");
 
 	// Expand section values
 	const [expandFirstNameInput, setExpandFirstNameInput] = useState(false);
@@ -43,6 +50,13 @@ function UserPage() {
 	const [currentPasswordError, setCurrentPasswordError] = useState(false);
 	const [matchError, setMatchError] = useState(false);
 
+	// states for deleting account
+	const [deleteEmailError, setDeleteEmailError] = useState(false);
+	const [deletePasswordError, setDeletePasswordError] = useState(false);
+
+	// tab states
+	const [leftActiveState, setLeftActiveState] = useState(true);
+
 	// ******************************************************
 	// *************  Conditional Error Values **************
 	// ******************************************************
@@ -50,6 +64,10 @@ function UserPage() {
 	let confirmMessage = confirmError ? "Confirmation is required" : "";
 	let currentPasswordMessage = currentPasswordError ? "Current password is required" : "";
 	let matchMessage = matchError ? "Passwords do not match" : "";
+	let deleteEmailMessage = deleteEmailError ? "Email is required to delete account" : "";
+	let deletePasswordMessage = deletePasswordError
+		? "Password is required to delete account"
+		: "";
 
 	// Email Regex Pattern
 	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -76,7 +94,7 @@ function UserPage() {
 	};
 
 	// Update function to update user data. Updates body depending on which fields are filled
-	const update = async () => {
+	const updateAccount = async () => {
 		// Error checks
 		const invalidEmailCheck = emailInput ? !emailPattern.test(emailInput) : false;
 		const confirmInputErrorCheck = passwordInput ? confirmInput.trim() === "" : false;
@@ -137,6 +155,38 @@ function UserPage() {
 		}
 	};
 
+	const deleteAccount = async () => {
+		// Error checks
+		const deleteEmailErrorCheck = deleteEmail.trim() === "";
+		const deletePasswordErrorCheck = deletePassword.trim() === "";
+
+		// Set error states
+		setDeleteEmailError(deleteEmailErrorCheck);
+		setDeletePasswordError(deletePasswordErrorCheck);
+
+		// Data to be sent in fetch request
+		const deleteData = { email: deleteEmail, password: deletePassword };
+
+		if (deleteEmailErrorCheck || deletePasswordErrorCheck) {
+			alert("Please fill out all fields");
+		} else {
+			// fetch request for deleting user data and logout current user, redirecting them to homepage
+			const response = await fetch(`/api/user/delete/${userId}`, {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(deleteData),
+			});
+			if (response.ok) {
+				alert("Account deleted");
+				window.location.href = "/";
+			} else {
+				alert("Incorrect email or password");
+			}
+		}
+	};
+
 	// Input update functions
 	const updateEmail = (event) => {
 		setEmailInput(event.currentTarget.value);
@@ -155,6 +205,13 @@ function UserPage() {
 	};
 	const updateLastName = (event) => {
 		setLastNameInput(event.currentTarget.value);
+	};
+
+	const updateDeleteEmail = (event) => {
+		setDeleteEmail(event.currentTarget.value);
+	};
+	const updateDeletePassword = (event) => {
+		setDeletePassword(event.currentTarget.value);
 	};
 
 	// ******************************************************
@@ -193,125 +250,213 @@ function UserPage() {
 				gap={6}
 			>
 				<Heading>{firstName}'s Profile</Heading>
-				<Text>Update your account details below</Text>
-				<FormControl
-					bgColor="white"
-					w="100%"
-					p={5}
-					m={5}
-					borderRadius={5}
-					onKeyUp={(event) => {
-						if (event.key === "Enter") update();
-					}}
-				>
-					<Flex direction="column" gap={2}>
-						{/* Click all brand buttons to expand their respective inputs */}
-						<BrandButton
-							width="fit-content"
-							onClick={() => setExpandFirstNameInput(!expandFirstNameInput)}
+
+				<Tabs variant="enclosed-colored" width="100%" isFitted size="lg">
+					<TabList>
+						<Tab
+							border="none"
+							borderBottomRadius={0}
+							borderTopRightRadius={0}
+							_selected={{
+								color: "brand.300",
+								bgColor: "white",
+								outline: "none",
+							}}
+							onClick={() => setLeftActiveState(true)}
 						>
-							Update First Name
-						</BrandButton>
-						{expandFirstNameInput && (
-							<Input
-								placeholder={firstName}
-								onChange={updateFirstName}
-								onBlur={updateFirstName}
-								id="firstName"
-							/>
-						)}
-						<BrandButton
-							width="fit-content"
-							onClick={() => setExpandLastNameInput(!expandLastNameInput)}
+							Update Account
+						</Tab>
+						<Tab
+							border="none"
+							borderBottomRadius={0}
+							borderTopLeftRadius={0}
+							_selected={{
+								color: "brand.300",
+								bgColor: "white",
+								outline: "none",
+							}}
+							onClick={() => setLeftActiveState(false)}
 						>
-							Update Last Name
-						</BrandButton>
-						{expandLastNameInput && (
-							<Input
-								placeholder={lastName}
-								onChange={updateLastName}
-								onBlur={updateLastName}
-								id="lastName"
-							/>
-						)}
-						<BrandButton
-							width="fit-content"
-							onClick={() => setExpandEmailInput(!expandEmailInput)}
-						>
-							Update Email
-						</BrandButton>
-						{expandEmailInput && (
-							<>
-								<Input
-									placeholder={email}
-									onChange={updateEmail}
-									onBlur={updateEmail}
-									isInvalid={invalidEmail}
-									id="email"
-								/>
-								{/* Error messages for invalid email */}
-								<Text my={0} py={0} color="red.600">
-									{invalidEmailMessage}
-								</Text>
-							</>
-						)}
-						<BrandButton
-							width="fit-content"
-							onClick={() => setExpandPasswordInputs(!expandPasswordInputs)}
-						>
-							Update Password
-						</BrandButton>
-						{expandPasswordInputs && (
-							<>
-								<FormLabel fontSize="sm" ml={4} my={0} py={0}>
-									New Password
-								</FormLabel>
-								<Input
-									type="password"
-									placeholder="New Password"
-									onChange={updatePassword}
-									onBlur={updatePassword}
-									id="password"
-								/>
-								<FormLabel fontSize="sm" ml={4} my={0} py={0}>
-									Confirm New Password
-								</FormLabel>
-								<Input
-									type="password"
-									placeholder="Confirm New Password"
-									onChange={updateConfirm}
-									onBlur={updateConfirm}
-									id="confirm"
-								/>
-								{/* Error messages for confirmation password */}
-								{confirmMessage || matchMessage ? (
+							Delete Account
+						</Tab>
+					</TabList>
+					<TabPanels>
+						<TabPanel padding={0}>
+							<FormControl
+								bgColor="white"
+								w="100%"
+								p={5}
+								borderBottomRadius={5}
+								onKeyUp={(event) => {
+									if (event.key === "Enter") updateAccount();
+								}}
+							>
+								<Flex direction="column" gap={2}>
+									{/* Click all brand buttons to expand their respective inputs */}
+									<BrandButton
+										width="fit-content"
+										onClick={() => setExpandFirstNameInput(!expandFirstNameInput)}
+									>
+										Update First Name
+									</BrandButton>
+									{expandFirstNameInput && (
+										<Input
+											placeholder={firstName}
+											width="50%"
+											onChange={updateFirstName}
+											onBlur={updateFirstName}
+											id="firstName"
+										/>
+									)}
+									<BrandButton
+										width="fit-content"
+										onClick={() => setExpandLastNameInput(!expandLastNameInput)}
+									>
+										Update Last Name
+									</BrandButton>
+									{expandLastNameInput && (
+										<Input
+											placeholder={lastName}
+											width="50%"
+											onChange={updateLastName}
+											onBlur={updateLastName}
+											id="lastName"
+										/>
+									)}
+									<BrandButton
+										width="fit-content"
+										onClick={() => setExpandEmailInput(!expandEmailInput)}
+									>
+										Update Email
+									</BrandButton>
+									{expandEmailInput && (
+										<>
+											<Input
+												placeholder={email}
+												width="50%"
+												onChange={updateEmail}
+												onBlur={updateEmail}
+												isInvalid={invalidEmail}
+												id="email"
+											/>
+											{/* Error messages for invalid email */}
+											<Text my={0} py={0} color="red.600">
+												{invalidEmailMessage}
+											</Text>
+										</>
+									)}
+									<BrandButton
+										width="fit-content"
+										onClick={() => setExpandPasswordInputs(!expandPasswordInputs)}
+									>
+										Update Password
+									</BrandButton>
+									{expandPasswordInputs && (
+										<>
+											<FormLabel fontSize="sm" ml={4} my={0} py={0}>
+												New Password
+											</FormLabel>
+											<Input
+												type="password"
+												placeholder="New Password"
+												width="50%"
+												onChange={updatePassword}
+												onBlur={updatePassword}
+												id="password"
+											/>
+											<FormLabel fontSize="sm" ml={4} my={0} py={0}>
+												Confirm New Password
+											</FormLabel>
+											<Input
+												type="password"
+												placeholder="Confirm New Password"
+												width="50%"
+												onChange={updateConfirm}
+												onBlur={updateConfirm}
+												id="confirm"
+											/>
+											{/* Error messages for confirmation password */}
+											{confirmMessage || matchMessage ? (
+												<Text my={0} py={0} color="red.600">
+													{confirmMessage} {matchMessage}
+												</Text>
+											) : (
+												<> </>
+											)}
+											<FormLabel fontSize="sm" ml={4} my={0} py={0}>
+												Current Password
+											</FormLabel>
+											<Input
+												type="password"
+												placeholder="Current Password"
+												width="50%"
+												onChange={updateCurrentPassword}
+												onBlur={updateCurrentPassword}
+												id="currentPassword"
+											/>
+											{/* Error messages for current password */}
+											<Text my={0} py={0} color="red.600">
+												{currentPasswordMessage}
+											</Text>
+										</>
+									)}
+								</Flex>
+							</FormControl>
+						</TabPanel>
+						<TabPanel padding={0}>
+							<FormControl
+								bgColor="white"
+								w="100%"
+								p={5}
+								borderBottomRadius={5}
+								onKeyUp={(event) => {
+									if (event.key === "Enter") deleteAccount();
+								}}
+							>
+								<Flex direction="column" gap={2}>
+									<FormLabel ml={4} my={0} py={0}>
+										Please enter your email to confirm account deletion.
+									</FormLabel>
+									<Input
+										placeholder="Email"
+										width="50%"
+										onChange={updateDeleteEmail}
+										onBlur={updateDeleteEmail}
+										isInvalid={deleteEmailError}
+										id="deleteEmail"
+									/>
 									<Text my={0} py={0} color="red.600">
-										{confirmMessage} {matchMessage}
+										{deleteEmailMessage}
 									</Text>
-								) : (
-									<> </>
-								)}
-								<FormLabel fontSize="sm" ml={4} my={0} py={0}>
-									Current Password
-								</FormLabel>
-								<Input
-									type="password"
-									placeholder="Current Password"
-									onChange={updateCurrentPassword}
-									onBlur={updateCurrentPassword}
-									id="currentPassword"
-								/>
-								{/* Error messages for current password */}
-								<Text my={0} py={0} color="red.600">
-									{currentPasswordMessage}
-								</Text>
-							</>
-						)}
-					</Flex>
-				</FormControl>
-				<BrandButton mb={3} onClick={update}>
-					Update
-				</BrandButton>
+									<FormLabel ml={4} my={0} py={0}>
+										Please enter your password to confirm account deletion.
+									</FormLabel>
+									<Input
+										type="password"
+										placeholder="Password"
+										width="50%"
+										onChange={updateDeletePassword}
+										onBlur={updateDeletePassword}
+										isInvalid={deletePasswordError}
+										id="deletePassword"
+									/>
+									<Text my={0} py={0} color="red.600">
+										{deletePasswordMessage}
+									</Text>
+								</Flex>
+							</FormControl>
+						</TabPanel>
+					</TabPanels>
+				</Tabs>
+				{leftActiveState ? (
+					<BrandButton mb={3} onClick={updateAccount}>
+						Update
+					</BrandButton>
+				) : (
+					<BrandButton mb={3} onClick={deleteAccount}>
+						Delete
+					</BrandButton>
+				)}
 			</Box>
 		</Box>
 	);
