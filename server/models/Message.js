@@ -7,6 +7,14 @@ const messageSchema = new Schema({
 		type: String,
 		required: true,
 	},
+	first_name: {
+		type: String,
+		required: true,
+	},
+	type: {
+		type: String,
+		required: true,
+	},
 	userId: {
 		type: Schema.Types.ObjectId,
 		ref: "User",

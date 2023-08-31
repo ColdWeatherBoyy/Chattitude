@@ -127,21 +127,7 @@ const Messages = ({ lastJsonMessage, firstName, messages, setMessages }) => {
 			{/* Map through messages array and display messages */}
 			{messages &&
 				messages.map((message, index) => {
-					const { timestamp, content } = message;
-					let type;
-					let messageContent;
-					let userName;
-					// Break content apart by : to style separately
-					// There is redundancy with how the message is being created on the back end, but this is a temporary solution
-					if (content.includes(":")) {
-						const firstColonIndex = content.indexOf(":");
-						userName = content.slice(0, firstColonIndex);
-						messageContent = content.slice(firstColonIndex + 1);
-						type = "chatevent";
-					} else {
-						type = "userevent";
-						messageContent = content;
-					}
+					const { timestamp, first_name, content, type } = message;
 					return (
 						<Flex
 							key={`message${index}`}
@@ -163,11 +149,11 @@ const Messages = ({ lastJsonMessage, firstName, messages, setMessages }) => {
 								<Flex w="100%" justifyContent="space-between" alignItems="center">
 									<Flex alignItems="center">
 										<Text
-											color={userName === firstName ? "brand.300" : "red.400"}
+											color={first_name === firstName ? "brand.300" : "red.400"}
 											fontWeight="bold"
 											fontSize="sm"
 										>
-											{userName}:
+											{first_name}:
 										</Text>
 										<Text
 											fontSize="md"
@@ -175,7 +161,7 @@ const Messages = ({ lastJsonMessage, firstName, messages, setMessages }) => {
 											wordBreak="break-word"
 											whiteSpace="pre-wrap"
 										>
-											{messageContent}
+											{content}
 										</Text>
 									</Flex>
 									<Text fontSize="2xs" color="gray.600">
@@ -190,7 +176,7 @@ const Messages = ({ lastJsonMessage, firstName, messages, setMessages }) => {
 									fontSize="2xs"
 								>
 									<Text>
-										{messageContent} - {timestamp}
+										{first_name} {content} - {timestamp}
 									</Text>
 								</Flex>
 							)}
