@@ -1,11 +1,14 @@
+// Required dependencies from Mongoose and bcrypt
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
 
+// Create a new Schema for the User model
 const userSchema = new Schema({
 	email: {
 		type: String,
 		required: true,
 		unique: true,
+		// validates email using a regex (frontend also handles this)
 		match: [/.+@.+\..+/, "Must match an email address!"],
 	},
 	first_name: {
@@ -19,6 +22,7 @@ const userSchema = new Schema({
 	password: {
 		type: String,
 		required: true,
+		// validates password using a regex
 		validate: {
 			validator: function (value) {
 				// tests password for having one digit, one lowercase, one uppercase, one special character, and to be at least 8 characters long
@@ -36,6 +40,7 @@ const userSchema = new Schema({
 	},
 });
 
+// Pre-save hook to hash password and lowercase email before saving new user
 userSchema.pre("save", async function (next) {
 	this.email = this.email.toLowerCase();
 	if (this.isNew || this.isModified("password")) {
@@ -49,6 +54,7 @@ userSchema.pre("save", async function (next) {
 	next();
 });
 
+// Pre-update hook to hash password and lowercase email before saving modified user
 userSchema.pre("findOneAndUpdate", async function (next) {
 	const update = this.getUpdate();
 	if (update.email) {
@@ -67,6 +73,7 @@ userSchema.pre("findOneAndUpdate", async function (next) {
 	next();
 });
 
+// Method to compare password to hashed password
 userSchema.methods.isCorrectPassword = async function (password) {
 	try {
 		return await bcrypt.compare(password, this.password);
@@ -75,6 +82,7 @@ userSchema.methods.isCorrectPassword = async function (password) {
 	}
 };
 
+// Create the User model using the userSchema
 const User = model("User", userSchema);
 
 module.exports = User;

@@ -3,21 +3,32 @@ import { useEffect, useState } from "react";
 import BrandButton from "../components/BrandButton.jsx";
 import Header from "../components/Header.jsx";
 
-function Login() {
+function LoginPage() {
+	// ******************************************************
+	// ****************  Login States *******************
+	// ******************************************************
 	const [emailInput, setEmailInput] = useState("");
 	const [passwordInput, setPasswordInput] = useState("");
 	const [emailError, setEmailError] = useState(false);
 	const [passwordError, setPasswordError] = useState(false);
-	const [makeFetch, setMakeFetch] = useState(false);
 	const [invalidEmail, setInvalidEmail] = useState(false);
 
+	// ******************************************************
+	// *************  Conditional Error Values **************
+	// ******************************************************
 	let emailMessage = emailError ? "Email is required" : "";
 	let passwordMessage = passwordError ? "Password is required" : "";
 	let invalidEmailMessage = invalidEmail ? "Entered value is not a valid email" : "";
 
+	// Email Regex Pattern
 	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-	async function fetchData() {
+	// ******************************************************
+	// ****************  Login Functions *********************
+	// ******************************************************
+
+	// Fetch function to send login data to server
+	const login = async () => {
 		try {
 			const response = await fetch("/api/user/post/login", {
 				method: "POST",
@@ -31,25 +42,26 @@ function Login() {
 			});
 			console.log(response);
 			if (response.ok) {
+				// If successful, redirects to chat
 				window.location.href = "/globalchat";
 			} else {
 				const errorData = await response.json();
+				// Alert on error logging in
 				alert(errorData.error);
 			}
 		} catch (error) {
 			console.log(error);
 		}
-	}
+	};
 
-	const logIn = async () => {
-		console.log("sign in attempt");
-		console.log("Email: " + emailInput);
-		console.log("Password: " + passwordInput);
-
+	// Function to handle log in
+	const handleLogin = async () => {
+		// Error checks for empty fields and invalid email
 		const emailInputErrorCheck = emailInput.trim() === "";
 		const passwordInputErrorCheck = passwordInput.trim() === "";
 		const invalidEmailCheck = !emailPattern.test(emailInput);
 
+		// Sets error states
 		setEmailError(emailInputErrorCheck);
 		setPasswordError(passwordInputErrorCheck);
 		if (!emailInputErrorCheck) {
@@ -57,21 +69,14 @@ function Login() {
 		}
 
 		if (!emailInputErrorCheck && !passwordInputErrorCheck && !invalidEmailCheck) {
-			setMakeFetch(true);
+			await login();
 		}
 	};
 
-	useEffect(() => {
-		if (makeFetch) {
-			fetchData();
-			setMakeFetch(false);
-		}
-	}, [makeFetch]);
-
+	// Functions to update email and password states
 	const updateEmail = (event) => {
 		setEmailInput(event.currentTarget.value);
 	};
-
 	const updatePassword = (event) => {
 		setPasswordInput(event.currentTarget.value);
 	};
@@ -95,7 +100,7 @@ function Login() {
 					m={5}
 					borderRadius={5}
 					onKeyUp={(event) => {
-						if (event.key === "Enter") logIn();
+						if (event.key === "Enter") handleLogin();
 					}}
 				>
 					<FormLabel>Email</FormLabel>
@@ -107,6 +112,7 @@ function Login() {
 						isInvalid={emailError || invalidEmail}
 						id="emailInput"
 					/>
+					{/* Error messages for emails */}
 					<Text pb={3} color="red.600">
 						{emailMessage} {invalidEmailMessage}
 					</Text>
@@ -119,14 +125,15 @@ function Login() {
 						isInvalid={passwordError}
 						id="passwordInput"
 					/>
+					{/* Error message for passwords */}
 					<Text pb={3} color="red.600">
 						{passwordMessage}
 					</Text>
 				</FormControl>
-				<BrandButton onClick={logIn}>Log In</BrandButton>
+				<BrandButton onClick={handleLogin}>Log In</BrandButton>
 			</Box>
 		</>
 	);
 }
 
-export default Login;
+export default LoginPage;

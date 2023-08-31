@@ -1,7 +1,11 @@
 import { Button } from "@chakra-ui/react";
 
+// Creates a custom button with the brand colors and design	to use throughout app
 const BrandButton = ({ children, ...rest }) => {
+	// Children is used to represent the text inside the button tags
+	// Rest is used to represent any other props passed to the button (in this case, generally onClick functions)
 	return (
+		// Default styling for brand button
 		<Button
 			bgColor="brand.300"
 			color="brand.200"
@@ -21,8 +25,10 @@ const BrandButton = ({ children, ...rest }) => {
 			_focus={{
 				outline: "none",
 			}}
+			// THe rest of the props are spread onto the button
 			{...rest}
 		>
+			{/* The text for the button */}
 			{children}
 		</Button>
 	);

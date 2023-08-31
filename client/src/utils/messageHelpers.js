@@ -1,3 +1,7 @@
+// **************************************************************
+// ********** Message Helper Functions **************************
+// **************************************************************
+
 // get the most recent twenty messages from the database
 export const getMessages = async () => {
 	try {

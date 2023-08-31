@@ -4,9 +4,9 @@ const { signToken, auth } = require("../../utils/auth");
 // const { handleLogout } = require("../../utils/serverHelper.js");
 const clients = require("../../server.js");
 
-// **************************
-// *** User GET Routes ***
-// **************************
+// ******************************************************
+// ****************  User Get Routes ********************
+// ******************************************************
 
 // Get User by ID route (available for all users if loggedIn)
 // /api/user/get/:id
@@ -45,7 +45,7 @@ router.get("/get", auth, async (req, res) => {
 	}
 });
 
-// validate token route
+// Validate token route
 // /api/user/get/validate
 router.get("/validate/", auth, async (req, res) => {
 	try {
@@ -63,22 +63,9 @@ router.get("/validate/", auth, async (req, res) => {
 	}
 });
 
-// logout user/clear token
-// /api/user/logout
-router.post("/logout", (req, res) => {
-	try {
-		// const userId = req.body.userId;
-		// handleLogout(userId);
-		res.clearCookie("chattitude-token");
-		res.status(200).json({ message: "Logout successful!" });
-	} catch (error) {
-		res.status(400).json(error);
-	}
-});
-
-// **************************
-// *** User Post Routes ***
-// **************************
+// ******************************************************
+// ****************  User Post Routes *******************
+// ******************************************************
 
 // User create route
 // /api/user/post/create
@@ -88,11 +75,11 @@ router.post("/post/create", async (req, res) => {
 		const { first_name, last_name, email, password } = req.body;
 
 		const user = await User.create({ first_name, last_name, email, password });
-		console.log("user", user);
-		// add JWT here
+
+		// Sign JWT token here
 		const token = signToken(user);
 
-		// http only cookie
+		// Send http only cookie
 		res.cookie("chattitude-token", token, { httpOnly: true });
 
 		res
@@ -122,9 +109,10 @@ router.post("/post/login", async (req, res) => {
 			return res.status(400).send({ error: "Password is incorrect, please try again." });
 		}
 
-		// add JWT here
+		// Sign JWT token here
 		const token = signToken(user);
 
+		// Send http only cookie
 		res.cookie("chattitude-token", token, { httpOnly: true });
 
 		res.json({ message: "Login successful!", user });
@@ -133,9 +121,21 @@ router.post("/post/login", async (req, res) => {
 	}
 });
 
-// **************************
-// *** User Put Routes ***
-// **************************
+// Logout user/clear token
+// /api/user/logout
+router.post("/logout", (req, res) => {
+	try {
+		// Clear http only cookie
+		res.clearCookie("chattitude-token");
+		res.status(200).json({ message: "Logout successful!" });
+	} catch (error) {
+		res.status(400).json(error);
+	}
+});
+
+// ******************************************************
+// ****************  User Put Routes ********************
+// ******************************************************
 
 // Update User name, email, or password, usable route for all three separate update functions.
 // /api/user/put/:id
@@ -235,9 +235,9 @@ router.put("/put/:id", auth, async (req, res) => {
 	}
 });
 
-// **************************
-// *** User Delete Routes ***
-// **************************
+// ******************************************************
+// ****************  User Delete Routes *****************
+// ******************************************************
 
 // Delete User by ID route
 // Requires UI to ask user to retype email address to confirm deletion

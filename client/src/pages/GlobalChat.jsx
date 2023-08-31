@@ -21,13 +21,22 @@ import { getMessages } from "../utils/messageHelpers";
 const WS_URL = "ws://127.0.0.1:3001";
 
 const GlobalChat = () => {
-	// State declarations
+	// ******************************************************
+	// ****************  GlobalChat States *******************
+	// ******************************************************
+
 	const [textareaInputValue, setTextareaInputValue] = useState("");
 	const [firstName, setFirstName] = useState("");
 	const [userId, setUserId] = useState("");
 	const [messages, setMessages] = useState([]);
 	const [isButtonHovered, setIsButtonHovered] = useState(false);
 	const [connectedUsers, setConnectedUsers] = useState([]);
+
+	// ******************************************************
+	// ****************  Additional Hooks *******************
+	// ******************************************************
+
+	// useDisclosure hook declarations
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	// useRef declarations
@@ -35,11 +44,16 @@ const GlobalChat = () => {
 
 	// WebSocket Hook declarations
 	const { sendJsonMessage, readyState, lastJsonMessage } = useWebSocket(WS_URL, {
+		// readyState is a value provided by the hook to check the connection state of the webSocket
+		// lastJsonMessage is a value provided by the hook to check the last message received from the webSocket
+		// sendJsonMessage is a function provided by the hook to send messages to the webSocket server
+
+		// Console.logs for debugging on Open and Close
 		onOpen: () => console.log("WebSocket connection opened"),
 		onClose: () => console.log("WebSocket connection closed"),
 		share: true,
 		retryOnError: true,
-		// set reconnect logic to attempt reconnect once every 3 seconds if connection fails, and is not intentional by the client
+		// Set reconnect logic to attempt reconnect once every 3 seconds if connection fails, and is not intentional by the client
 		shouldReconnect: (closeEvent) => {
 			if (closeEvent.code === 1000) {
 				return false;
@@ -49,11 +63,9 @@ const GlobalChat = () => {
 		},
 	});
 
-	useEffect(() => {
-		if (lastJsonMessage) {
-			setConnectedUsers(lastJsonMessage.users);
-		}
-	}, [lastJsonMessage]);
+	// ******************************************************
+	// ****************  GlobalChat Functions ***************
+	// ******************************************************
 
 	// Send message to server
 	const handleSendMessage = () => {
@@ -74,6 +86,22 @@ const GlobalChat = () => {
 		}
 	};
 
+	const validateAndExtract = async () => {
+		const { firstName, userId } = await validateToken();
+		setFirstName(firstName);
+		setUserId(userId);
+
+		const data = await getMessages();
+		setMessages(data);
+
+		sendJsonMessage({
+			first_name: firstName,
+			userId: userId,
+			content: `${firstName} has joined the chat`,
+			type: "userevent",
+		});
+	};
+
 	// CSS Event Handlers
 	const handleButtonHover = () => {
 		setIsButtonHovered(true);
@@ -83,25 +111,19 @@ const GlobalChat = () => {
 		setIsButtonHovered(false);
 	};
 
-	// useEffect declarations
+	// ******************************************************
+	// ****************  GlobalChat UseEffects **************
+	// ******************************************************
+
+	// Grabs the connected users from the lastJsonMessage and sets the connectedUsers state
+	useEffect(() => {
+		if (lastJsonMessage) {
+			setConnectedUsers(lastJsonMessage.users);
+		}
+	}, [lastJsonMessage]);
+
 	// Validate user token on page load, redirect to login page if invalid
 	useEffect(() => {
-		const validateAndExtract = async () => {
-			const { firstName, userId } = await validateToken();
-			setFirstName(firstName);
-			setUserId(userId);
-
-			const data = await getMessages();
-			setMessages(data);
-
-			sendJsonMessage({
-				first_name: firstName,
-				userId: userId,
-				content: `${firstName} has joined the chat`,
-				type: "userevent",
-			});
-		};
-
 		// Check WebSocket connection state before sending the message
 		if (readyState === 1) {
 			validateAndExtract();
@@ -123,6 +145,7 @@ const GlobalChat = () => {
 			<Header />
 			<Heading my={5}>Chat</Heading>
 			<BrandButton onClick={onOpen}>Online Users</BrandButton>
+			{/* Online Users drawer */}
 			<Drawer isOpen={isOpen} placement="left" onClose={onClose}>
 				<DrawerOverlay />
 				<DrawerContent>
@@ -158,6 +181,7 @@ const GlobalChat = () => {
 				justifyContent="space-between"
 				boxShadow="xl"
 			>
+				{/* Messages Component */}
 				<Messages
 					lastJsonMessage={lastJsonMessage}
 					firstName={firstName}
@@ -165,6 +189,7 @@ const GlobalChat = () => {
 					setMessages={setMessages}
 				/>
 				<Flex flexDirection="row" boxShadow="lg" borderRadius={8}>
+					{/* Use of AutoResizeTextArea for clean display that updates per user input, to a limit */}
 					<AutoResizeTextarea
 						ref={chatTextarea}
 						textareaInputValue={textareaInputValue}
@@ -193,6 +218,7 @@ const GlobalChat = () => {
 						_hover={{
 							boxShadow: "none",
 						}}
+						// custom scrollbar
 						css={{
 							"&::-webkit-scrollbar": {
 								width: 8,

@@ -1,6 +1,7 @@
 import { CircularProgress, Flex } from "@chakra-ui/react";
 
-// Component designed and built for loading API call, utilizing Chakra's circular progress bar for a more visually engaging loader effect
+// Component designed and built for various loads, utilizing Chakra's circular progress bar for a more visually engaging loader effect
+// Used in Messages component for loading more messages
 function Loader({ marginBottom }) {
 	return (
 		<Flex justify="center" align="center" width="100%" mb={marginBottom}>

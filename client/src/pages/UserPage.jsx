@@ -11,14 +11,19 @@ import { useState, useEffect } from "react";
 import BrandButton from "../components/BrandButton.jsx";
 import Header from "../components/Header.jsx";
 import { validateToken } from "../utils/auth";
-import { set } from "mongoose";
 
 function UserPage() {
+	// ******************************************************
+	// ****************  User States *******************
+	// ******************************************************
+
+	// User values
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [userId, setUserId] = useState("");
 	const [email, setEmail] = useState("");
 
+	// Input values
 	const [firstNameInput, setFirstNameInput] = useState("");
 	const [lastNameInput, setLastNameInput] = useState("");
 	const [emailInput, setEmailInput] = useState("");
@@ -26,71 +31,53 @@ function UserPage() {
 	const [confirmInput, setConfirmInput] = useState("");
 	const [currentPasswordInput, setCurrentPasswordInput] = useState("");
 
+	// Expand section values
 	const [expandFirstNameInput, setExpandFirstNameInput] = useState(false);
 	const [expandLastNameInput, setExpandLastNameInput] = useState(false);
 	const [expandEmailInput, setExpandEmailInput] = useState(false);
 	const [expandPasswordInputs, setExpandPasswordInputs] = useState(false);
 
-	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+	// States for errors
 	const [invalidEmail, setInvalidEmail] = useState(false);
 	const [confirmError, setConfirmError] = useState(false);
 	const [currentPasswordError, setCurrentPasswordError] = useState(false);
 	const [matchError, setMatchError] = useState(false);
 
+	// ******************************************************
+	// *************  Conditional Error Values **************
+	// ******************************************************
 	let invalidEmailMessage = invalidEmail ? "Entered value is not a valid email" : "";
 	let confirmMessage = confirmError ? "Confirmation is required" : "";
 	let currentPasswordMessage = currentPasswordError ? "Current password is required" : "";
 	let matchMessage = matchError ? "Passwords do not match" : "";
 
-	useEffect(() => {
-		const validateAndExtract = async () => {
-			const data = await validateToken();
-			if (data.valid) {
-				setFirstName(data.firstName);
-				setUserId(data.userId);
-			}
-		};
-		validateAndExtract();
-	}, []);
+	// Email Regex Pattern
+	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-	useEffect(() => {
-		const fetchUser = async () => {
-			const response = await fetch(`/api/user/get/${userId}`);
-			const data = await response.json();
-			setFirstName(data.first_name);
-			setLastName(data.last_name);
-			setEmail(data.email);
-		};
-		if (userId) {
-			fetchUser();
+	// ******************************************************
+	// ****************  User Functions *********************
+	// ******************************************************
+
+	// Function to validate token and extract user data
+	const validateAndExtract = async () => {
+		const data = await validateToken();
+		if (data.valid) {
+			setUserId(data.userId);
 		}
-	}, [userId]);
-
-	const updateEmail = (event) => {
-		setEmailInput(event.currentTarget.value);
 	};
 
-	const updatePassword = (event) => {
-		setPasswordInput(event.currentTarget.value);
+	// Fetch function to get rest of user data
+	const fetchUser = async () => {
+		const response = await fetch(`/api/user/get/${userId}`);
+		const data = await response.json();
+		setFirstName(data.first_name);
+		setLastName(data.last_name);
+		setEmail(data.email);
 	};
 
-	const updateConfirm = (event) => {
-		setConfirmInput(event.currentTarget.value);
-	};
-
-	const updateCurrentPassword = (event) => {
-		setCurrentPasswordInput(event.currentTarget.value);
-	};
-
-	const updateFirstName = (event) => {
-		setFirstNameInput(event.currentTarget.value);
-	};
-
-	const updateLastName = (event) => {
-		setLastNameInput(event.currentTarget.value);
-	};
-
+	// Update function to update user data. Updates body depending on which fields are filled
 	const update = async () => {
+		// Error checks
 		const invalidEmailCheck = emailInput ? !emailPattern.test(emailInput) : false;
 		const confirmInputErrorCheck = passwordInput ? confirmInput.trim() === "" : false;
 		const currentPasswordInputErrorCheck = passwordInput
@@ -98,12 +85,17 @@ function UserPage() {
 			: false;
 		const passwordMatchErrorCheck =
 			passwordInput.trim() !== confirmInput.trim() && confirmInput.trim() !== "";
+
+		// Set error states
 		setConfirmError(confirmInputErrorCheck);
 		setMatchError(passwordMatchErrorCheck);
 		setInvalidEmail(invalidEmailCheck);
 		setCurrentPasswordError(currentPasswordInputErrorCheck);
 
+		// Data to be sent in fetch request
 		const updateData = {};
+
+		// Check which fields are filled and add to updateData
 		if (firstNameInput !== "") {
 			updateData.newFirstName = firstNameInput;
 		}
@@ -119,6 +111,7 @@ function UserPage() {
 			updateData.existingPassword = currentPasswordInput;
 		}
 
+		// If no fields are filled, alert user
 		if (
 			!updateData.newFirstName &&
 			!updateData.newLastName &&
@@ -129,7 +122,7 @@ function UserPage() {
 		) {
 			alert("No changes made");
 		} else {
-			// fetch request for updating user data
+			// fetch request for updating user data if any fields are filled
 			const response = await fetch(`/api/user/put/${userId}`, {
 				method: "PUT",
 				headers: {
@@ -138,10 +131,47 @@ function UserPage() {
 				body: JSON.stringify(updateData),
 			});
 			if (response.ok) {
+				// reloads page to update user data
 				window.location.href = `/${userId}`;
 			}
 		}
 	};
+
+	// Input update functions
+	const updateEmail = (event) => {
+		setEmailInput(event.currentTarget.value);
+	};
+	const updatePassword = (event) => {
+		setPasswordInput(event.currentTarget.value);
+	};
+	const updateConfirm = (event) => {
+		setConfirmInput(event.currentTarget.value);
+	};
+	const updateCurrentPassword = (event) => {
+		setCurrentPasswordInput(event.currentTarget.value);
+	};
+	const updateFirstName = (event) => {
+		setFirstNameInput(event.currentTarget.value);
+	};
+	const updateLastName = (event) => {
+		setLastNameInput(event.currentTarget.value);
+	};
+
+	// ******************************************************
+	// ****************  User useEffects ********************
+	// ******************************************************
+
+	// Validate token and extract user data on mount
+	useEffect(() => {
+		validateAndExtract();
+	}, []);
+
+	// Fetch user data on userId change (validation)
+	useEffect(() => {
+		if (userId) {
+			fetchUser();
+		}
+	}, [userId]);
 
 	return (
 		<Box
@@ -175,6 +205,7 @@ function UserPage() {
 					}}
 				>
 					<Flex direction="column" gap={2}>
+						{/* Click all brand buttons to expand their respective inputs */}
 						<BrandButton
 							width="fit-content"
 							onClick={() => setExpandFirstNameInput(!expandFirstNameInput)}
@@ -218,6 +249,7 @@ function UserPage() {
 									isInvalid={invalidEmail}
 									id="email"
 								/>
+								{/* Error messages for invalid email */}
 								<Text my={0} py={0} color="red.600">
 									{invalidEmailMessage}
 								</Text>
@@ -251,6 +283,7 @@ function UserPage() {
 									onBlur={updateConfirm}
 									id="confirm"
 								/>
+								{/* Error messages for confirmation password */}
 								{confirmMessage || matchMessage ? (
 									<Text my={0} py={0} color="red.600">
 										{confirmMessage} {matchMessage}
@@ -268,6 +301,7 @@ function UserPage() {
 									onBlur={updateCurrentPassword}
 									id="currentPassword"
 								/>
+								{/* Error messages for current password */}
 								<Text my={0} py={0} color="red.600">
 									{currentPasswordMessage}
 								</Text>
