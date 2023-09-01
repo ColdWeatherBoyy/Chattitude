@@ -17,7 +17,6 @@ import { useState, useEffect } from "react";
 import BrandButton from "../components/BrandButton.jsx";
 import Header from "../components/Header.jsx";
 import { validateToken, logout } from "../utils/auth";
-import { set } from "mongoose";
 
 function UserPage() {
 	// ******************************************************
