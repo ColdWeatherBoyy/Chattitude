@@ -212,6 +212,10 @@ router.put("/put/:id", auth, async (req, res) => {
 			} else if (!existingPassword) {
 				// if resetting password, asks for existing password and new password typed twice
 				return res.status(400).send({ error: "Please enter your existing password." });
+			} else if (existingPassword === newPassword) {
+				return res
+					.status(400)
+					.send({ error: "New password provided matches existing password provided." });
 			} else {
 				const verified = await user.isCorrectPassword(existingPassword);
 
