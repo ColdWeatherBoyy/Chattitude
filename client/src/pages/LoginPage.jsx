@@ -1,5 +1,14 @@
-import { Box, Heading, FormControl, FormLabel, Input, Text } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import {
+	Box,
+	Heading,
+	FormControl,
+	FormLabel,
+	Input,
+	Text,
+	useToast,
+} from "@chakra-ui/react";
+import { useState } from "react";
+
 import BrandButton from "../components/BrandButton.jsx";
 import Header from "../components/Header.jsx";
 
@@ -12,6 +21,11 @@ function LoginPage() {
 	const [emailError, setEmailError] = useState(false);
 	const [passwordError, setPasswordError] = useState(false);
 	const [invalidEmail, setInvalidEmail] = useState(false);
+
+	// ******************************************************
+	// ****************  Toast Hook *************************
+	// ******************************************************
+	const toast = useToast();
 
 	// ******************************************************
 	// *************  Conditional Error Values **************
@@ -42,12 +56,27 @@ function LoginPage() {
 			});
 			console.log(response);
 			if (response.ok) {
-				// If successful, redirects to chat
-				window.location.href = "/globalchat";
+				toast({
+					title: "Logged In",
+					description: "You will be redirected to the chat.",
+					status: "success",
+					duration: 3000,
+					isClosable: true,
+				});
+				// Redirect to chat page
+				setTimeout(() => {
+					window.location.href = "/globalchat";
+				}, 750);
 			} else {
 				const errorData = await response.json();
-				// Alert on error logging in
-				alert(errorData.error);
+				// Toast on error logging in
+				toast({
+					title: "Error Logging In",
+					description: errorData.error,
+					status: "error",
+					duration: 3000,
+					isClosable: true,
+				});
 			}
 		} catch (error) {
 			console.log(error);

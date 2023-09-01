@@ -1,6 +1,6 @@
 import { Link as ReactRouterLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Box, Heading, Text, Link } from "@chakra-ui/react";
+import { Box, Heading, Text, Link, useToast } from "@chakra-ui/react";
 import { validateTokenForDisplay, logout } from "../utils/auth.js";
 
 // Header component for the app
@@ -14,6 +14,11 @@ function Header() {
 	const [validated, setValidated] = useState(false);
 	const [firstName, setFirstName] = useState("");
 	const [userId, setUserId] = useState("");
+
+	// ******************************************************
+	// ****************  Toast Hook *************************
+	// ******************************************************
+	const toast = useToast();
 
 	// ******************************************************
 	// ****************  Header Functions *******************
@@ -30,7 +35,16 @@ function Header() {
 			setUserId("");
 		}
 		// Redirect to home page
-		window.location.href = "/";
+		toast({
+			title: "Logged out",
+			description: "You will be redirected to the homepage.",
+			status: "success",
+			duration: 3000,
+			isClosable: true,
+		});
+		setTimeout(() => {
+			window.location.href = "/";
+		}, 750);
 	};
 
 	// ******************************************************

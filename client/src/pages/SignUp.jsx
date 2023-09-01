@@ -1,4 +1,12 @@
-import { Box, Heading, FormControl, FormLabel, Input, Text } from "@chakra-ui/react";
+import {
+	Box,
+	Heading,
+	FormControl,
+	FormLabel,
+	Input,
+	Text,
+	useToast,
+} from "@chakra-ui/react";
 import { useState } from "react";
 import Header from "../components/Header.jsx";
 import BrandButton from "../components/BrandButton.jsx";
@@ -19,6 +27,11 @@ function SignUp() {
 	const [matchError, setMatchError] = useState(false);
 	const [firstNameError, setFirstNameError] = useState(false);
 	const [lastNameError, setLastNameError] = useState(false);
+
+	// ******************************************************
+	// ****************  Toast Hook *************************
+	// ******************************************************
+	const toast = useToast();
 
 	// ******************************************************
 	// *************  Conditional Error Values **************
@@ -54,15 +67,35 @@ function SignUp() {
 				}),
 			});
 			if (response.ok) {
-				window.location.href = "/globalchat";
+				toast({
+					title: "Account Created",
+					description: "You will be redirected to the chat.",
+					status: "success",
+					duration: 3000,
+					isClosable: true,
+				});
+				setTimeout(() => {
+					window.location.href = "/globalchat";
+				}, 750);
 			} else {
 				const errorData = await response.json();
 				if (errorData.error.code === 11000) {
-					alert("Email is already associated with an active account.");
+					toast({
+						title: "Error Signing In",
+						description: "Email is already associated with an active account.",
+						status: "error",
+						duration: 3000,
+						isClosable: true,
+					});
 				} else if (errorData.error.name === "ValidationError") {
-					alert(
-						"Password must be at least 8 characters long and contain one lowercase letter, one uppercase letter, one number, and one special character."
-					);
+					toast({
+						title: "Error Signing In.",
+						description:
+							"Password must be at least 8 characters long and contain one lowercase letter, one uppercase letter, one number, and one special character.",
+						status: "error",
+						duration: 3000,
+						isClosable: true,
+					});
 				}
 			}
 		} catch (error) {
