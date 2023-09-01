@@ -67,7 +67,16 @@ function SignUp() {
 				}),
 			});
 			if (response.ok) {
-				window.location.href = "/globalchat";
+				toast({
+					title: "Account Created",
+					description: "You will be redirected to the chat.",
+					status: "success",
+					duration: 3000,
+					isClosable: true,
+				});
+				setTimeout(() => {
+					window.location.href = "/globalchat";
+				}, 750);
 			} else {
 				const errorData = await response.json();
 				if (errorData.error.code === 11000) {

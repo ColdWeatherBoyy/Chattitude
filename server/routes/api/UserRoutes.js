@@ -181,16 +181,24 @@ router.put("/put/:id", auth, async (req, res) => {
 		if (newFirstName && newFirstName !== user.first_name) {
 			user.first_name = newFirstName;
 			changes++;
+		} else if (newFirstName && newFirstName === user.first_name) {
+			return res
+				.status(400)
+				.json({ error: "New first name matches existing first name." });
 		}
 
 		if (newLastName && newLastName !== user.last_name) {
 			user.last_name = newLastName;
 			changes++;
+		} else if (newLastName && newLastName === user.last_name) {
+			return res.status(400).send({ error: "New last name matches existing last name." });
 		}
 
 		if (newEmail && newEmail !== user.email) {
 			user.email = newEmail;
 			changes++;
+		} else if (newEmail && newEmail === user.email) {
+			return res.status(400).send({ error: "New email matches existing email." });
 		}
 
 		// Checks to see if new password is provided, with appropriate confirmation checks
@@ -224,6 +232,10 @@ router.put("/put/:id", auth, async (req, res) => {
 
 		// Finally, update user info with new info
 		const updatedUser = await user.save();
+
+		// Update token
+		const token = signToken(updatedUser);
+		res.cookie("chattitude-token", token, { httpOnly: true });
 
 		res.status(200).json({
 			message: `Account for ${updatedUser.first_name} ${updatedUser.last_name} updated!`,

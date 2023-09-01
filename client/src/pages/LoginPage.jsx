@@ -56,8 +56,17 @@ function LoginPage() {
 			});
 			console.log(response);
 			if (response.ok) {
-				// If successful, redirects to chat
-				window.location.href = "/globalchat";
+				toast({
+					title: "Logged In",
+					description: "You will be redirected to the chat.",
+					status: "success",
+					duration: 3000,
+					isClosable: true,
+				});
+				// Redirect to chat page
+				setTimeout(() => {
+					window.location.href = "/globalchat";
+				}, 750);
 			} else {
 				const errorData = await response.json();
 				// Toast on error logging in

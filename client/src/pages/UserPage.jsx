@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import BrandButton from "../components/BrandButton.jsx";
 import Header from "../components/Header.jsx";
 import { validateToken, logout } from "../utils/auth";
+import { set } from "mongoose";
 
 function UserPage() {
 	// ******************************************************
@@ -161,8 +162,26 @@ function UserPage() {
 				body: JSON.stringify(updateData),
 			});
 			if (response.ok) {
-				// reloads page to update user data
-				window.location.href = `/${userId}`;
+				toast({
+					title: "Success",
+					description: "Account updated.",
+					status: "success",
+					duration: 3000,
+					isClosable: true,
+				});
+
+				setTimeout(() => {
+					window.location.reload();
+				}, 750);
+			} else {
+				const error = await response.json();
+				toast({
+					title: "Update failed",
+					description: error.error,
+					status: "error",
+					duration: 3000,
+					isClosable: true,
+				});
 			}
 		}
 	};
@@ -207,7 +226,7 @@ function UserPage() {
 				if (response.ok && response.status === 200) {
 					setTimeout(() => {
 						window.location.href = "/";
-					}, 1000);
+					}, 750);
 				}
 			} else {
 				toast({
