@@ -109,6 +109,7 @@ router.post("/post/login", async (req, res) => {
 		}
 
 		// Sign JWT token here
+
 		const token = signToken(user);
 
 		// Send http only cookie
