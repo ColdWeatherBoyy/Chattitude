@@ -11,11 +11,12 @@ import {
 	TabPanels,
 	Tab,
 	TabPanel,
+	useToast,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import BrandButton from "../components/BrandButton.jsx";
 import Header from "../components/Header.jsx";
-import { validateToken } from "../utils/auth";
+import { validateToken, logout } from "../utils/auth";
 
 function UserPage() {
 	// ******************************************************
@@ -50,12 +51,17 @@ function UserPage() {
 	const [currentPasswordError, setCurrentPasswordError] = useState(false);
 	const [matchError, setMatchError] = useState(false);
 
-	// states for deleting account
+	// States for deleting account
 	const [deleteEmailError, setDeleteEmailError] = useState(false);
 	const [deletePasswordError, setDeletePasswordError] = useState(false);
 
-	// tab states
+	// Tab states
 	const [leftActiveState, setLeftActiveState] = useState(true);
+
+	// ******************************************************
+	// ******************** Toast Hooks *********************
+	// ******************************************************
+	const toast = useToast();
 
 	// ******************************************************
 	// *************  Conditional Error Values **************
@@ -129,7 +135,7 @@ function UserPage() {
 			updateData.existingPassword = currentPasswordInput;
 		}
 
-		// If no fields are filled, alert user
+		// If no fields are filled, toast user
 		if (
 			!updateData.newFirstName &&
 			!updateData.newLastName &&
@@ -138,7 +144,13 @@ function UserPage() {
 			!updateData.confirmationNewPassword &&
 			!updateData.existingPassword
 		) {
-			alert("No changes made");
+			toast({
+				title: "No changes provided.",
+				description: "Please fill out at least one field to update.",
+				status: "warning",
+				duration: 3000,
+				isClosable: true,
+			});
 		} else {
 			// fetch request for updating user data if any fields are filled
 			const response = await fetch(`/api/user/put/${userId}`, {
@@ -168,7 +180,12 @@ function UserPage() {
 		const deleteData = { email: deleteEmail, password: deletePassword };
 
 		if (deleteEmailErrorCheck || deletePasswordErrorCheck) {
-			alert("Please fill out all fields");
+			toast({
+				title: "Please fill out all fields to delete account.",
+				status: "error",
+				duration: 3000,
+				isClosable: true,
+			});
 		} else {
 			// fetch request for deleting user data and logout current user, redirecting them to homepage
 			const response = await fetch(`/api/user/delete/${userId}`, {
@@ -179,10 +196,27 @@ function UserPage() {
 				body: JSON.stringify(deleteData),
 			});
 			if (response.ok) {
-				alert("Account deleted");
-				window.location.href = "/";
+				toast({
+					title: "Account deleted",
+					description: "You will be redirected to the homepage.",
+					status: "success",
+					duration: 3000,
+					isClosable: true,
+				});
+				await logout(userId);
+				if (response.ok && response.status === 200) {
+					setTimeout(() => {
+						window.location.href = "/";
+					}, 1000);
+				}
 			} else {
-				alert("Incorrect email or password");
+				toast({
+					title: "Incorrect email or password",
+					description: "Please try again.",
+					status: "error",
+					duration: 3000,
+					isClosable: true,
+				});
 			}
 		}
 	};
