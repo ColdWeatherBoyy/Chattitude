@@ -10,12 +10,14 @@ const chatMessages = [];
 // Variable to track last received message
 let lastReceivedMessage = null;
 
+const baseURL = process.env.baseURL || "http://localhost:3001";
+
 // ******************************************************
 // ****************  Websocket Functions ****************
 // ******************************************************
 
 // handle message
-const handleMessage = async (message, connectionId, clients, HOSTPATHFORAPI) => {
+const handleMessage = async (message, connectionId, clients) => {
 	const dataFromClient = JSON.parse(message.toString());
 	const timestamp = getTimestamp();
 
@@ -38,11 +40,11 @@ const handleMessage = async (message, connectionId, clients, HOSTPATHFORAPI) => 
 		connections.set(connectionId, userId);
 		const content = "joined the chat";
 		chatMessages.push({ first_name, content, timestamp, type, connectionId });
-		saveMessageInDb(first_name, content, timestamp, type, userId, HOSTPATHFORAPI);
+		saveMessageInDb(first_name, content, timestamp, type, userId);
 	} else if (dataFromClient.type === "chatevent") {
 		const { first_name, content, userId, type } = dataFromClient;
 		chatMessages.push({ first_name, content, timestamp, type, connectionId });
-		saveMessageInDb(first_name, content, timestamp, type, userId, HOSTPATHFORAPI);
+		saveMessageInDb(first_name, content, timestamp, type, userId);
 	}
 
 	const json = { chatMessages };
@@ -52,7 +54,7 @@ const handleMessage = async (message, connectionId, clients, HOSTPATHFORAPI) => 
 };
 
 // handle disconnect of a client
-const handleDisconnect = (connectionId, clients, HOSTPATHFORAPI) => {
+const handleDisconnect = (connectionId, clients) => {
 	const userId = connections.get(connectionId);
 	if (!userId) {
 		return;
@@ -81,7 +83,7 @@ const handleDisconnect = (connectionId, clients, HOSTPATHFORAPI) => {
 	delete clients[connectionId];
 	connections.delete(connectionId);
 	users.delete(userId);
-	saveMessageInDb(first_name, content, timestamp, type, userId, HOSTPATHFORAPI);
+	saveMessageInDb(first_name, content, timestamp, type, userId);
 	const json = { chatMessages };
 	broadcastMessage(json, clients);
 };
@@ -103,16 +105,9 @@ const broadcastMessage = (json, clients) => {
 };
 
 // save message in database
-const saveMessageInDb = async (
-	first_name,
-	content,
-	timestamp,
-	type,
-	userId,
-	HOSTPATHFORAPI
-) => {
-	// generate the right path to the api endpoint
-	const url = `${HOSTPATHFORAPI}/api/message/create`;
+const saveMessageInDb = async (first_name, content, timestamp, type, userId) => {
+	const url = `${baseURL}/api/message/create`;
+
 	try {
 		const newMessage = await fetch(url, {
 			method: "POST",

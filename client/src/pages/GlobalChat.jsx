@@ -18,7 +18,10 @@ import AutoResizeTextarea from "../components/ResizeTextarea";
 import { validateToken } from "../utils/auth";
 import { getMessages } from "../utils/messageHelpers";
 
-const WS_URL = "ws://127.0.0.1:3001";
+const WS_URL =
+	process.env.NODE_ENV === "production"
+		? window.location.origin.replace(/^http/, "ws")
+		: "ws://localhost:3001/";
 
 const GlobalChat = () => {
 	// ******************************************************
