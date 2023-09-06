@@ -41,6 +41,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "..", "client", "public")));
 
+// Serve static assets in production
+if (process.env.NODE_ENV === "production") {
+	app.use(express.static(path.join(__dirname, "..", "client", "build")));
+}
+
 // Routes
 app.use("/", routes);
 
