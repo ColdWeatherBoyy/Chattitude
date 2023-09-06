@@ -42,7 +42,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "..", "client", "public")));
 
 app.get("/", (req, res) => {
-	res.sendFile(join(__dirname, "..", "client", "dist", "index.html"));
+	res.sendFile(path.join(__dirname, "..", "client", "dist", "index.html"));
 });
 
 // Routes
