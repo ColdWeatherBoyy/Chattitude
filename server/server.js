@@ -14,7 +14,6 @@ const routes = require("./routes");
 const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT || 3001;
-const HOSTPATHFORAPI = process.env.HOSTPATHFORAPI || "http://localhost:3001";
 
 // Websocket setup
 const { WebSocketServer } = require("ws");
@@ -32,11 +31,9 @@ wsServer.on("connection", function (connection) {
 	clients[connectionId] = connection;
 
 	// User sent a message, either userevent or a chatevent
-	connection.on("message", (message) =>
-		handleMessage(message, connectionId, clients, HOSTPATHFORAPI)
-	);
+	connection.on("message", (message) => handleMessage(message, connectionId, clients));
 	// User disconnected
-	connection.on("close", () => handleDisconnect(connectionId, clients, HOSTPATHFORAPI));
+	connection.on("close", () => handleDisconnect(connectionId, clients));
 });
 
 // Express middleware
