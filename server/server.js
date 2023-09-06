@@ -41,13 +41,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "..", "client", "public")));
 
-// Serve static assets in production
-if (process.env.NODE_ENV === "production") {
-	app.use(express.static(path.join(__dirname, "..", "client", "build")));
-}
+app.get("/", (req, res) => {
+	res.sendFile(join(__dirname, "..", "client", "dist", "index.html"));
+});
 
 // Routes
-app.use("/", routes);
+app.use(routes);
 
 // Connect to database and start server
 db.once("open", () => {
