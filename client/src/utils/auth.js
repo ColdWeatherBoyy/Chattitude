@@ -19,7 +19,7 @@ export const validateToken = async () => {
 	} catch (error) {
 		console.error(error);
 		// redirect to login page
-		// window.location.href = "/login";
+		window.location.href = "/login";
 	}
 };
 
