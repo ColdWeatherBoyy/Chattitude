@@ -72,6 +72,8 @@ router.post("/create", async (req, res) => {
 			first_name,
 		});
 
+		console.log(messageData);
+
 		res.status(200).json(messageData);
 	} catch (err) {
 		res.status(400).json(err);
