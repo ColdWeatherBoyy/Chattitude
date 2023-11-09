@@ -31,7 +31,7 @@ const router = createBrowserRouter([
 	},
 	// Need to fix this so that this route is only accessible if the user is logged in
 	{
-		path: "/:id",
+		path: "/user/:id",
 		element: <UserPage />,
 	},
 	{

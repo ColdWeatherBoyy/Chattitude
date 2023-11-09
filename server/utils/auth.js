@@ -20,8 +20,7 @@ module.exports = {
 					.find((cookie) => cookie.trim().startsWith("chattitude-token="))
 			: null;
 		if (!tokenCookie) {
-			// return res.status(401).json({ message: "No token, authorization denied" });
-			return next;
+			return res.status(401).json({ message: "No token, authorization denied" });
 		}
 		try {
 			const token = tokenCookie.split("=")[1];
