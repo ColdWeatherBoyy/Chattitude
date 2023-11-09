@@ -7,14 +7,13 @@
 		"build": "cd client && npm run build",
 		"install": "concurrently \"cd client && npm install\" \"cd server && npm install\"",
 		"dev": "concurrently \"cd client && npm run dev\" \"cd server && npm run watch\"",
-		"start": "cd server && npm run start"
+		"server": "cd server && npm run start",
+		"start": "npm run build && npm run server"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"concurrently": "^8.2.0",
-		"vite": "^4.4.9",
-		"@vitejs/plugin-react-swc": "^3.0.0"
+		"concurrently": "^8.2.0"
 	}
 }

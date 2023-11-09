@@ -55,27 +55,4 @@ router.get("/get/nextTwentyMessages/:lastDisplayedMessageId", async (req, res) =
 // 	}
 // });
 
-// ******************************************************
-// ****************  Message Post Routes ****************
-// ******************************************************
-
-// Create a message
-// api/message/create
-router.post("/create", async (req, res) => {
-	try {
-		const { content, userId, timestamp, type, first_name } = req.body;
-		const messageData = await Message.create({
-			content,
-			userId,
-			timestamp,
-			type,
-			first_name,
-		});
-
-		res.status(200).json(messageData);
-	} catch (err) {
-		res.status(400).json(err);
-	}
-});
-
 module.exports = router;

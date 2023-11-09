@@ -39,14 +39,14 @@ wsServer.on("connection", function (connection) {
 // Express middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, "..", "client", "public")));
-
-app.get("/", (req, res) => {
-	res.sendFile(path.join(__dirname, "..", "client", "dist", "index.html"));
-});
+app.use(express.static(path.join(__dirname, "..", "client", "dist")));
 
 // Routes
 app.use(routes);
+
+app.get("*", (req, res) => {
+	res.sendFile(path.join(__dirname, "..", "client", "dist", "index.html"));
+});
 
 // Connect to database and start server
 db.once("open", () => {

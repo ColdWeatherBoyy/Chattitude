@@ -1,4 +1,5 @@
 const { WebSocket } = require("ws");
+const { Message } = require("../models");
 const { getTimestamp } = require("./getTimestamp");
 
 // Map used to track users
@@ -9,8 +10,6 @@ const connections = new Map();
 const chatMessages = [];
 // Variable to track last received message
 let lastReceivedMessage = null;
-
-const baseURL = process.env.baseURL || "http://localhost:3001";
 
 // ******************************************************
 // ****************  Websocket Functions ****************
@@ -106,18 +105,14 @@ const broadcastMessage = (json, clients) => {
 
 // save message in database
 const saveMessageInDb = async (first_name, content, timestamp, type, userId) => {
-	const url = `${baseURL}/api/message/create`;
-
 	try {
-		const newMessage = await fetch(url, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ content, userId, timestamp, type, first_name }),
+		await Message.create({
+			content,
+			userId,
+			timestamp,
+			type,
+			first_name,
 		});
-		if (!newMessage.ok) throw new Error("Error saving message");
-		const newMessageObj = await newMessage.json();
 	} catch (err) {
 		console.error(err);
 	}

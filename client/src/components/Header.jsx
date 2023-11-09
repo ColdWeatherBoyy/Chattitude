@@ -94,7 +94,7 @@ function Header() {
 				{/* Conditional display of options in the right hand side of the header (logout and link to user page vs. sign up and log in links) */}
 				{!loading && validated ? (
 					<>
-						<Link as={ReactRouterLink} to={`/${userId}`}>
+						<Link as={ReactRouterLink} to={`/user/${userId}`}>
 							<Text mx={3}>{firstName}</Text>
 						</Link>
 						<Link onClick={() => handleLogout()}>

@@ -26,6 +26,7 @@ export const getMoreMessages = async (messages, setMessages) => {
 	try {
 		// get the message Id for the last message in the chat box
 		const lastMessageId = messages[0]._id;
+
 		// get the next twenty messages from the database, given the last message
 		const nextTwentyMessages = await fetch(
 			`/api/message/get/nextTwentyMessages/${lastMessageId}`,
