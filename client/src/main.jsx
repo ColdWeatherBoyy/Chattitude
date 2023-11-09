@@ -26,7 +26,7 @@ const router = createBrowserRouter([
 		element: <SignUp />,
 	},
 	{
-		path: "/GlobalChat",
+		path: "/globalchat",
 		element: <GlobalChat />,
 	},
 	// Need to fix this so that this route is only accessible if the user is logged in
