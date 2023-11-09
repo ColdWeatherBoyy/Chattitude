@@ -10,8 +10,6 @@ const chatMessages = [];
 // Variable to track last received message
 let lastReceivedMessage = null;
 
-const baseURL = process.env.baseURL || "http://localhost:3001";
-
 // ******************************************************
 // ****************  Websocket Functions ****************
 // ******************************************************
@@ -106,10 +104,8 @@ const broadcastMessage = (json, clients) => {
 
 // save message in database
 const saveMessageInDb = async (first_name, content, timestamp, type, userId) => {
-	const url = `${baseURL}/api/message/create`;
-
 	try {
-		const newMessage = await fetch(url, {
+		const newMessage = await fetch("/api/message/create", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
