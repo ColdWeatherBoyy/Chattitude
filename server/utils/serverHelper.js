@@ -1,4 +1,5 @@
 const { WebSocket } = require("ws");
+const { Message } = require("../models");
 const { getTimestamp } = require("./getTimestamp");
 
 // Map used to track users
@@ -105,15 +106,13 @@ const broadcastMessage = (json, clients) => {
 // save message in database
 const saveMessageInDb = async (first_name, content, timestamp, type, userId) => {
 	try {
-		const newMessage = await fetch("/api/message/create", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ content, userId, timestamp, type, first_name }),
+		await Message.create({
+			content,
+			userId,
+			timestamp,
+			type,
+			first_name,
 		});
-		if (!newMessage.ok) throw new Error("Error saving message");
-		const newMessageObj = await newMessage.json();
 	} catch (err) {
 		console.error(err);
 	}
