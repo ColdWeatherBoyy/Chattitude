@@ -14,7 +14,7 @@
 </div>
 <br />
 <div style="text-align:center">
-  <h1>Physical Therapy Timers</h1>
+  <h1>Chattitude</h1>
 </div>
 
 <details>
